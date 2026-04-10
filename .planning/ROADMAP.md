@@ -28,9 +28,9 @@ Raider Bot should ship in three phases: first establish a trustworthy Slack scor
 **Plans**: 3 plans
 
 Plans:
-- [ ] 01-01: Bootstrap the Bolt app, environment validation, Slack app manifest, and database schema.
-- [ ] 01-02: Implement manual `/raid` creation and raid target message posting.
-- [ ] 01-03: Build reaction handlers, scoring windows, dedupe rules, and engagement log persistence.
+- [ ] 01-01-PLAN.md — Bootstrap the Bolt runtime, shared message/scoring contracts, and Phase 1 Supabase schema.
+- [ ] 01-02-PLAN.md — Implement the `/raid` modal flow, manual raid persistence, and canonical Slack posting path.
+- [ ] 01-03-PLAN.md — Build reaction scoring, reversible audit logs, and authoritative publish-time correction handling.
 
 ### Phase 2: Publish Automation & Staff Commands
 **Goal**: Replace manual timing gaps with authenticated publish automation and give staff and admins the command surfaces they need.
