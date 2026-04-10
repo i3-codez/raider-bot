@@ -1,7 +1,8 @@
 ---
 phase: "01"
 slug: slack-core-trusted-scoring
-status: draft
+status: approved
+reviewed_at: 2026-04-10T16:28:15-04:00
 shadcn_initialized: false
 preset: none
 created: 2026-04-10
@@ -120,7 +121,7 @@ Modal copy rules:
 
 - Title: `Create raid`
 - Submit: `Create raid`
-- Close: `Cancel`
+- Close: `Close without posting`
 - Intro helper copy: `Post a raid target for the team. Published time is optional.`
 - Published-time hint: `Leave blank if unknown. Raider Bot will use Slack post time and mark the raid as approximate.`
 - Validation copy for future timestamp: `Published time can't be in the future.`
@@ -149,6 +150,7 @@ Build every raid message with this block order. Keep the live message to 8 block
 
 Message composition rules:
 
+- Primary focal point: the standalone post URL row. The header is secondary orientation only.
 - The post URL must appear above the legend and above the timing rules.
 - Timing confidence gets its own row. Do not bury approximate timing in footer copy.
 - Reaction legend and timing rules must both be visible in the initial message body. Staff should not need `/raiderhelp` to participate correctly in Phase 1.
@@ -216,11 +218,11 @@ Sources: Slack Block Kit docs, `.planning/PROJECT.md`, `.planning/STATE.md`.
 
 ## Checker Sign-Off
 
-- [ ] Dimension 1 Copywriting: PASS
-- [ ] Dimension 2 Visuals: PASS
-- [ ] Dimension 3 Color: PASS
-- [ ] Dimension 4 Typography: PASS
-- [ ] Dimension 5 Spacing: PASS
-- [ ] Dimension 6 Registry Safety: PASS
+- [x] Dimension 1 Copywriting: PASS
+- [x] Dimension 2 Visuals: PASS
+- [x] Dimension 3 Color: PASS
+- [x] Dimension 4 Typography: PASS
+- [x] Dimension 5 Spacing: PASS
+- [x] Dimension 6 Registry Safety: PASS
 
-**Approval:** pending
+**Approval:** approved
