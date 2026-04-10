@@ -25,12 +25,16 @@ Raider Bot should ship in three phases: first establish a trustworthy Slack scor
   2. Staff reactions award at most one score per action type per post, while different action types still stack correctly.
   3. Reaction removal reverses or deactivates the related score without breaking the audit trail.
   4. Raid posts and engagement logs persist enough detail to explain how any Phase 1 score was produced.
-**Plans**: 3 plans
+**Plans**: 7 plans
 
 Plans:
-- [ ] 01-01-PLAN.md — Bootstrap the Bolt runtime, shared message/scoring contracts, and Phase 1 Supabase schema.
-- [ ] 01-02-PLAN.md — Implement the `/raid` modal flow, manual raid persistence, and canonical Slack posting path.
-- [ ] 01-03-PLAN.md — Build reaction scoring, reversible audit logs, and authoritative publish-time correction handling.
+- [ ] 01-01-PLAN.md — Establish the repo tooling, env validation, logger, and shared time utilities.
+- [ ] 01-02-PLAN.md — Add the Slack manifest, Bolt bootstrap, and empty command or event registration shells.
+- [ ] 01-03-PLAN.md — Define the shared scoring contracts, emoji registry, and canonical raid-message builder.
+- [ ] 01-04-PLAN.md — Add the Phase 1 Postgres schema, DB helper, and schema verification.
+- [ ] 01-05-PLAN.md — Implement the `/raid` modal flow, manual raid persistence, and canonical Slack posting path.
+- [ ] 01-06-PLAN.md — Wire reaction events into explicit handler-to-service scoring, dedupe, and reversal logging.
+- [ ] 01-07-PLAN.md — Implement authoritative publish-time correction, score recalculation, and Slack timing-row refresh.
 
 ### Phase 2: Publish Automation & Staff Commands
 **Goal**: Replace manual timing gaps with authenticated publish automation and give staff and admins the command surfaces they need.
@@ -68,6 +72,6 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Slack Core & Trusted Scoring | 0/3 | Not started | - |
+| 1. Slack Core & Trusted Scoring | 0/7 | Not started | - |
 | 2. Publish Automation & Staff Commands | 0/3 | Not started | - |
 | 3. Reporting, Reminders & Launch Hardening | 0/3 | Not started | - |

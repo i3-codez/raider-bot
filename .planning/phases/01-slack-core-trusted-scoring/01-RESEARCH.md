@@ -35,7 +35,7 @@ None — discussion stayed within phase scope.
 | ENG-01 | Supported Slack reactions map to like, comment, repost, and quote-post actions. [VERIFIED: .planning/REQUIREMENTS.md] | Centralize emoji aliases in one registry and use the same registry for message copy, scoring, and tests. [VERIFIED: .planning/research/PITFALLS.md] |
 | ENG-02 | A user can claim each action type at most once per post. [VERIFIED: .planning/REQUIREMENTS.md] | Enforce uniqueness in Postgres on `(raid_post_id, slack_user_id, action_type)` rather than with in-memory state. [CITED: https://www.postgresql.org/docs/current/sql-insert.html] |
 | ENG-03 | Different action types stack on the same post for the same user. [VERIFIED: .planning/REQUIREMENTS.md] | Model action type as part of the uniqueness key so `like` and `comment` can coexist for the same user/post pair. [VERIFIED: .planning/REQUIREMENTS.md] |
-| ENG-04 | Points are calculated from `published_at` using fixed 0-10m, 10-20m, 20-30m, 30-60m, and 60m+ windows. [VERIFIED: .planning/REQUIREMENTS.md] | Implement one deterministic scoring service with a fixed integer matrix and shared window helper, never inline timing logic in listeners. [VERIFIED: .planning/PROJECT.md][VERIFIED: .planning/research/ARCHITECTURE.md] |
+| ENG-04 | Points are calculated from `published_at` using fixed 0-10m, 10-20m, 20-30m, 30-60m, and 60m+ windows. [VERIFIED: .planning/REQUIREMENTS.md] | Implement one deterministic scoring service with the resolved matrix `10/8/6/3/0` across those five windows, and keep the same values in the message copy and tests. [VERIFIED: .planning/PROJECT.md][VERIFIED: .planning/phases/01-slack-core-trusted-scoring/01-CONTEXT.md] |
 | ENG-05 | Removing a reaction reverses or deactivates the associated score. [VERIFIED: .planning/REQUIREMENTS.md] | Handle `reaction_removed` and mark the existing engagement row inactive with `removed_at`; do not hard-delete audit facts. [CITED: https://docs.slack.dev/reference/events/reaction_removed/][VERIFIED: .planning/REQUIREMENTS.md] |
 | ENG-06 | Engagement logs retain `reacted_at`, `minutes_from_publish`, `scoring_window`, `points_awarded`, and optional `removed_at`. [VERIFIED: .planning/REQUIREMENTS.md] | Store raw event-derived timestamps plus computed scoring facts on each engagement row so any score can be explained later. [CITED: https://docs.slack.dev/reference/events/reaction_added/][CITED: https://docs.slack.dev/reference/events/reaction_removed/] |
 </phase_requirements>
@@ -349,20 +349,22 @@ await client.chat.postMessage({
 | # | Claim | Section | Risk if Wrong |
 |---|-------|---------|---------------|
 | A1 | Manual dashboard configuration is the main alternative to a versioned Slack app manifest for this phase. [ASSUMED] | `## Standard Stack` | The planner may overemphasize manifest work if the team already provisions apps another way. |
-| A2 | If the user does not lock a stricter rule during planning, Phase 1 can control `/raid` operationally by channel and documented process instead of building app-level allowlisting immediately. [ASSUMED] | `## Open Questions` | Unauthorized or noisy raid creation could slip into the first rollout. |
-| A3 | V4 access control for Phase 1 should be satisfied by deciding and enforcing who may use `/raid`, even if that starts as an operational policy rather than full in-app RBAC. [ASSUMED] | `## Security Domain` | The plan could under-scope or mis-scope operator restrictions. |
+| A2 | Superseded on 2026-04-10 during plan revision: Phase 1 `/raid` access control is an explicit Slack user allowlist via `SLACK_RAID_OPERATOR_USER_IDS`, not channel-only policy. [RESOLVED: planning] | `## Resolved Planning Decisions` | Low risk after explicit handler enforcement is planned. |
+| A3 | Superseded on 2026-04-10 during plan revision: V4 access control is satisfied in Phase 1 by the same operator allowlist plus private denial for non-operators. [RESOLVED: planning] | `## Security Domain` | Low risk after explicit handler enforcement is planned. |
 
-## Open Questions
+## Resolved Planning Decisions
 
-1. **What exact integer timing matrix should Phase 1 lock, especially for `60m+`?**
-   - What we know: The product requires five fixed windows and the phase context leaves exact point values to discretion. [VERIFIED: .planning/REQUIREMENTS.md][VERIFIED: .planning/phases/01-slack-core-trusted-scoring/01-CONTEXT.md]
-   - What's unclear: Whether the last bucket should score zero or a small non-zero amount. [VERIFIED: .planning/STATE.md]
-   - Recommendation: Decide this in planning before implementation starts, then render the same matrix in both the raid legend and scoring tests. [VERIFIED: .planning/STATE.md][VERIFIED: .planning/phases/01-slack-core-trusted-scoring/01-CONTEXT.md]
+1. **Timing matrix resolved for Phase 1**
+   - Decision: Lock the five windows to `0-10m = 10`, `10-20m = 8`, `20-30m = 6`, `30-60m = 3`, and `60m+ = 0`. [RESOLVED: planning][VERIFIED: .planning/phases/01-slack-core-trusted-scoring/01-CONTEXT.md]
+   - Why: This keeps the first 30 minutes materially dominant, preserves deterministic integer scoring, and avoids awarding points after the product's core response window has clearly passed. [INFERENCE from .planning/PROJECT.md and .planning/REQUIREMENTS.md]
+   - Planning consequence: The same `10/8/6/3/0` matrix should appear in the canonical scoring config, the Slack raid message timing section, and the scoring tests. [RESOLVED: planning]
 
-2. **What is the minimum operator-control rule for `/raid` in Phase 1?**
-   - What we know: Requirements say an operator can create a raid, but no allowlist or channel policy is locked yet. [VERIFIED: .planning/REQUIREMENTS.md][VERIFIED: .planning/phases/01-slack-core-trusted-scoring/01-CONTEXT.md]
-   - What's unclear: Whether Phase 1 should trust any installed user, a configured channel, or an explicit Slack user allowlist. [VERIFIED: .planning/STATE.md]
-   - Recommendation: If the user does not lock a stricter rule during planning, at least scope `/raid` operationally to the raid channel and document who may use it. [ASSUMED]
+2. **Minimum `/raid` operator-control rule resolved for Phase 1**
+   - Decision: Restrict `/raid` to an explicit Slack user allowlist loaded from `SLACK_RAID_OPERATOR_USER_IDS`; unauthorized users receive a private denial and the modal never opens. [RESOLVED: planning]
+   - Why: This is the smallest reliable V4 access-control rule that still keeps Phase 1 operationally safe without introducing full RBAC or extra admin UI. [INFERENCE from .planning/REQUIREMENTS.md and AGENTS.md]
+   - Planning consequence: The command handler should enforce the allowlist, and the bootstrap wiring should register only those production handlers rather than leaving operator control to convention. [RESOLVED: planning]
+
+This section is resolved as of 2026-04-10. No Phase 1 research blockers remain from the timing matrix or `/raid` operator-control questions.
 
 ## Environment Availability
 
@@ -391,7 +393,7 @@ await client.chat.postMessage({
 |---------------|---------|-----------------|
 | V2 Authentication | no for end-user auth in Phase 1. [VERIFIED: .planning/REQUIREMENTS.md] | Slack request authenticity is handled separately through signed requests, not user login. [CITED: https://docs.slack.dev/authentication/verifying-requests-from-slack/] |
 | V3 Session Management | no. [VERIFIED: .planning/REQUIREMENTS.md] | The phase does not introduce browser or user sessions. [VERIFIED: .planning/REQUIREMENTS.md] |
-| V4 Access Control | yes. [VERIFIED: .planning/REQUIREMENTS.md] | Decide and enforce who may use `/raid`, at minimum through channel or operator policy. [ASSUMED] |
+| V4 Access Control | yes. [VERIFIED: .planning/REQUIREMENTS.md] | Restrict `/raid` to `SLACK_RAID_OPERATOR_USER_IDS` and return a private denial for non-operators. [RESOLVED: planning] |
 | V5 Input Validation | yes. [VERIFIED: .planning/REQUIREMENTS.md] | Use `zod` to validate slash-command input, env vars, and future webhook payloads. [VERIFIED: npm registry][VERIFIED: AGENTS.md] |
 | V6 Cryptography | yes. [CITED: https://docs.slack.dev/authentication/verifying-requests-from-slack/] | Use Slack signing secrets and Bolt's built-in verification path; never invent custom crypto. [CITED: https://docs.slack.dev/authentication/verifying-requests-from-slack/] |
 
