@@ -1,0 +1,29 @@
+display_information:
+  name: Raider Bot
+features:
+  bot_user:
+    display_name: Raider Bot
+    always_online: false
+  slash_commands:
+    - command: /raid
+      description: Create a new raid target in the configured raid channel.
+      should_escape: false
+      url: https://your-raider-bot.example.com/slack/events
+oauth_config:
+  scopes:
+    bot:
+      - commands
+      - chat:write
+      - reactions:read
+settings:
+  event_subscriptions:
+    request_url: https://your-raider-bot.example.com/slack/events
+    bot_events:
+      - reaction_added
+      - reaction_removed
+  interactivity:
+    is_enabled: true
+    request_url: https://your-raider-bot.example.com/slack/events
+  org_deploy_enabled: false
+  socket_mode_enabled: false
+  token_rotation_enabled: false
