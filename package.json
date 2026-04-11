@@ -1,0 +1,27 @@
+{
+  "name": "raider-bot",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "scripts": {
+    "dev": "tsx watch src/app/server.ts",
+    "start": "tsx src/app/server.ts",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@slack/bolt": "4.7.0",
+    "pino": "10.3.1",
+    "postgres": "3.4.9",
+    "zod": "4.3.6"
+  },
+  "devDependencies": {
+    "@types/node": "24.5.2",
+    "tsx": "4.21.0",
+    "typescript": "6.0.2",
+    "vitest": "4.1.4"
+  }
+}
