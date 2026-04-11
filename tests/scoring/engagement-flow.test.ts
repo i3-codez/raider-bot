@@ -550,9 +550,9 @@ describe("engagement scoring persistence", () => {
     });
 
     expect(harness.statements[0]).toContain(
-      "on conflict (raid_post_id, slack_user_id, action_type) do update",
+      "ON CONFLICT (raid_post_id, slack_user_id, action_type) DO UPDATE",
     );
-    expect(harness.statements[0]).toContain("where engagement_logs.removed_at is not null");
+    expect(harness.statements[0]).toContain("WHERE engagement_logs.removed_at IS NOT NULL");
     expect(harness.statements[1]).toContain("update engagement_logs");
     expect(harness.statements[1]).toContain("set removed_at =");
     expect(harness.statements[1]).not.toContain("delete from engagement_logs");
