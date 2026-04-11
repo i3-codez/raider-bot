@@ -9,12 +9,18 @@ interface RaidSlackRefRow {
   id: string;
   published_at: Date | string | null;
   slack_posted_at: Date | string;
+  owner_external_id: string | null;
+  owner_display_name: string | null;
+  owner_slack_user_id: string | null;
 }
 
 export interface RaidSlackRefRecord {
   id: string;
   publishedAt: Date | null;
   slackPostedAt: Date;
+  ownerExternalId: string | null;
+  ownerDisplayName: string | null;
+  ownerSlackUserId: string | null;
 }
 
 function toDate(value: Date | string): Date {
@@ -29,7 +35,10 @@ export async function findRaidBySlackRef({
     select
       id,
       published_at,
-      slack_posted_at
+      slack_posted_at,
+      owner_external_id,
+      owner_display_name,
+      owner_slack_user_id
     from raid_posts
     where slack_channel_id = ${slackChannelId}
       and slack_message_ts = ${slackMessageTs}
@@ -46,5 +55,8 @@ export async function findRaidBySlackRef({
     id: row.id,
     publishedAt: row.published_at ? toDate(row.published_at) : null,
     slackPostedAt: toDate(row.slack_posted_at),
+    ownerExternalId: row.owner_external_id,
+    ownerDisplayName: row.owner_display_name,
+    ownerSlackUserId: row.owner_slack_user_id,
   };
 }

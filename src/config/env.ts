@@ -30,6 +30,16 @@ const operatorUserIdsSchema = z.string().trim().min(1).transform((value, context
   return Array.from(new Set(userIds));
 });
 
+const booleanFlagSchema = z
+  .preprocess((value) => {
+    if (typeof value === "string") {
+      return value.trim().toLowerCase();
+    }
+
+    return value;
+  }, z.union([z.boolean(), z.enum(["true", "false"])]).default("false"))
+  .transform((value) => value === true || value === "true");
+
 export const envSchema = z.object({
   DATABASE_URL: z.string().trim().min(1),
   SLACK_BOT_TOKEN: z.string().trim().min(1),
@@ -37,6 +47,7 @@ export const envSchema = z.object({
   SLACK_RAID_CHANNEL_ID: z.string().trim().min(1),
   SLACK_RAID_OPERATOR_USER_IDS: operatorUserIdsSchema,
   PUBLISH_WEBHOOK_SHARED_SECRET: z.string().trim().min(1),
+  RAIDER_EXCLUDE_SELF_RAIDS: booleanFlagSchema,
   SLACK_APP_TOKEN: optionalString,
   LOG_LEVEL: z
     .enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"])
