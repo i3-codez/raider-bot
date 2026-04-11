@@ -8,9 +8,9 @@
 ### Raid Intake
 
 - [x] **RAID-01**: Operator can create a raid target manually with `/raid` using a post URL, client name, and platform.
-- [ ] **RAID-02**: Publishing workflow can create a raid target through an authenticated webhook that includes `published_at`.
+- [x] **RAID-02**: Publishing workflow can create a raid target through an authenticated webhook that includes `published_at`.
 - [x] **RAID-03**: Each raid post stores `published_at`, `slack_posted_at`, `slack_message_ts`, `slack_channel_id`, `timing_confidence`, and `month_key`.
-- [ ] **RAID-04**: Duplicate publish events or repeated manual submissions do not create duplicate raid posts.
+- [x] **RAID-04**: Duplicate publish events or repeated manual submissions do not create duplicate raid posts.
 - [x] **RAID-05**: Raider Bot posts each new raid target into the configured Slack channel within minutes of ingest.
 - [x] **RAID-06**: Each raid target message shows the reaction legend and speed-window rules staff need to participate correctly.
 
@@ -22,14 +22,14 @@
 - [x] **ENG-04**: Points are calculated from `published_at` using fixed 0-10m, 10-20m, 20-30m, 30-60m, and 60m+ windows.
 - [x] **ENG-05**: Removing a reaction reverses or deactivates the associated score.
 - [x] **ENG-06**: Engagement logs retain `reacted_at`, `minutes_from_publish`, `scoring_window`, `points_awarded`, and optional `removed_at`.
-- [ ] **ENG-07**: Self-raids can be excluded when a post owner is known and the rule is enabled.
+- [x] **ENG-07**: Self-raids can be excluded when a post owner is known and the rule is enabled.
 
 ### Team & Commands
 
-- [ ] **TEAM-01**: Slack user IDs can be mapped to active leaderboard display names.
-- [ ] **TEAM-02**: `/leaderboard` returns the current monthly ranking in Slack.
-- [ ] **TEAM-03**: `/mystats` DMs the requesting user their current-month stats.
-- [ ] **TEAM-04**: `/raiderhelp` explains the emoji mapping and scoring rules on demand.
+- [x] **TEAM-01**: Slack user IDs can be mapped to active leaderboard display names.
+- [x] **TEAM-02**: `/leaderboard` returns the current monthly ranking in Slack.
+- [x] **TEAM-03**: `/mystats` DMs the requesting user their current-month stats.
+- [x] **TEAM-04**: `/raiderhelp` explains the emoji mapping and scoring rules on demand.
 
 ### Reporting & Operations
 
@@ -73,13 +73,13 @@
 | ENG-04 | Phase 1 | Complete |
 | ENG-05 | Phase 1 | Complete |
 | ENG-06 | Phase 1 | Complete |
-| RAID-02 | Phase 2 | Pending |
-| RAID-04 | Phase 2 | Pending |
-| ENG-07 | Phase 2 | Pending |
-| TEAM-01 | Phase 2 | Pending |
-| TEAM-02 | Phase 2 | Pending |
-| TEAM-03 | Phase 2 | Pending |
-| TEAM-04 | Phase 2 | Pending |
+| RAID-02 | Phase 2 | Complete |
+| RAID-04 | Phase 2 | Complete |
+| ENG-07 | Phase 2 | Complete |
+| TEAM-01 | Phase 2 | Complete |
+| TEAM-02 | Phase 2 | Complete |
+| TEAM-03 | Phase 2 | Complete |
+| TEAM-04 | Phase 2 | Complete |
 | RPT-01 | Phase 3 | Pending |
 | RPT-02 | Phase 3 | Pending |
 | RPT-03 | Phase 3 | Pending |
@@ -92,4 +92,4 @@
 
 ---
 *Requirements defined: 2026-04-10*
-*Last updated: 2026-04-11 after Phase 1 completion*
+*Last updated: 2026-04-11 after Phase 2 completion*

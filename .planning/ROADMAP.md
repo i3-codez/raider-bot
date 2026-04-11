@@ -11,7 +11,7 @@ Raider Bot should ship in three phases: first establish a trustworthy Slack scor
 - Decimal phases (2.1, 2.2): urgent insertions if new risks appear later
 
 - [x] **Phase 1: Slack Core & Trusted Scoring** - establish the raid message loop, scoring engine, and durable audit data. (completed 2026-04-11)
-- [ ] **Phase 2: Publish Automation & Staff Commands** - add webhook ingest, dedupe, roster mapping, and staff-facing command surfaces.
+- [x] **Phase 2: Publish Automation & Staff Commands** - add webhook ingest, dedupe, roster mapping, and staff-facing command surfaces. (completed 2026-04-11)
 - [ ] **Phase 3: Reporting, Reminders & Launch Hardening** - add recurring summaries, monthly reset behavior, reminder hooks, and pilot readiness.
 
 ## Phase Details
@@ -45,12 +45,12 @@ Plans:
   2. Duplicate publish events or retried requests do not create duplicate raid posts or duplicate scores.
   3. `/leaderboard`, `/mystats`, and `/raiderhelp` return accurate data drawn from the same canonical scoring model.
   4. Team roster mapping and optional self-raid exclusion behave predictably when owner data is present.
-**Plans**: 3 plans
+**Plans**: 3/3 plans complete
 
 Plans:
-- [ ] 02-01: Add authenticated publish webhook ingest, timing-confidence handling, and raid dedupe safeguards.
-- [ ] 02-02: Build team roster and owner-mapping services, including optional self-raid exclusion controls.
-- [ ] 02-03: Implement `/leaderboard`, `/mystats`, and `/raiderhelp` on top of reusable query services.
+- [x] 02-01: Add authenticated publish webhook ingest, timing-confidence handling, and raid dedupe safeguards.
+- [x] 02-02: Build team roster and owner-mapping services, including optional self-raid exclusion controls.
+- [x] 02-03: Implement `/leaderboard`, `/mystats`, and `/raiderhelp` on top of reusable query services.
 
 ### Phase 3: Reporting, Reminders & Launch Hardening
 **Goal**: Add recurring reinforcement loops, reliable month-boundary behavior, and the ops safeguards needed for pilot launch.
@@ -73,5 +73,5 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Slack Core & Trusted Scoring | 7/7 | Complete    | 2026-04-11 |
-| 2. Publish Automation & Staff Commands | 0/3 | Not started | - |
+| 2. Publish Automation & Staff Commands | 3/3 | Complete    | 2026-04-11 |
 | 3. Reporting, Reminders & Launch Hardening | 0/3 | Not started | - |

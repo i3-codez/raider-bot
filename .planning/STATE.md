@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready_to_plan
-stopped_at: Phase 1 complete; preparing Phase 2 discuss/plan/execute
-last_updated: "2026-04-11T04:17:43.352Z"
-last_activity: 2026-04-11 -- Phase 1 marked complete after successful linked Supabase push; Phase 2 queued
+stopped_at: Phase 2 complete; preparing Phase 3 discuss/plan/execute
+last_updated: "2026-04-11T05:17:19.179Z"
+last_activity: 2026-04-11
 progress:
   total_phases: 3
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 13
-  completed_plans: 7
-  percent: 54
+  completed_plans: 10
+  percent: 77
 ---
 
 # Project State
@@ -21,22 +21,22 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-10)
 
 **Core value:** A newly published client post reaches the right staff in Slack fast enough that meaningful engagement happens inside the first 30 minutes.
-**Current focus:** Phase 02 — Publish Automation & Staff Commands
+**Current focus:** Phase 03 — Reporting, Reminders & Launch Hardening
 
 ## Current Position
 
-Phase: 02 (Publish Automation & Staff Commands)
+Phase: 03 (Reporting, Reminders & Launch Hardening)
 Plan: Not started
 Status: Ready to discuss and plan
-Last activity: 2026-04-11 -- Phase 1 marked complete after successful linked Supabase push; Phase 2 queued
+Last activity: 2026-04-11 -- Phase 2 completed; Phase 3 queued
 
-Progress: [#####-----] 54%
+Progress: [########--] 77%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 7
+- Total plans completed: 10
 - Average duration: ~0.7 hours
 - Total execution time: ~4.0 hours
 
@@ -45,11 +45,12 @@ Progress: [#####-----] 54%
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01 | 7 | ~4.0h | ~0.6h |
+| 02 | 3 | ~1.0h | ~0.3h |
 
 **Recent Trend:**
 
-- Last 5 plans: 01-03, 01-04, 01-05, 01-06, 01-07
-- Trend: strong Phase 1 execution completed; moving into Phase 2 implementation
+- Last 5 plans: 02-01, 02-01, 02-02, 02-03, 02-03
+- Trend: Phase 2 completed end-to-end with green tests and linked Supabase schema pushes
 
 ## Accumulated Context
 
@@ -66,6 +67,9 @@ Recent decisions affecting current work:
 - Phase 1 planning: split the foundation work into separate tooling, Slack bootstrap, and shared-contract plans.
 - Phase 1 execution: all code, tests, and summaries are complete for Plans 01-01 through 01-07.
 - Phase 1 execution: `npx supabase db push --linked` succeeded on 2026-04-11, closing the final schema verification blocker.
+- Phase 2 execution: publish webhook ingest now shares the canonical raid creation path and dedupes by normalized post URL or source event ID.
+- Phase 2 execution: team roster aliases can backfill `owner_slack_user_id`, enabling optional self-raid exclusion without breaking scoring for ambiguous matches.
+- Phase 2 execution: `/leaderboard`, `/mystats`, and `/raiderhelp` now read from one shared monthly reporting layer.
 
 ### Pending Todos
 
@@ -77,6 +81,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-11T04:17:43.352Z
-Stopped at: Phase 1 complete; preparing Phase 2 discuss/plan/execute
+Last session: 2026-04-11T05:17:19.179Z
+Stopped at: Phase 2 complete; preparing Phase 3 discuss/plan/execute
 Resume file: .planning/ROADMAP.md
