@@ -9,6 +9,18 @@ features:
       description: Create a new raid target in the configured raid channel.
       should_escape: false
       url: https://your-raider-bot.example.com/slack/events
+    - command: /leaderboard
+      description: Show the current monthly Raider Bot leaderboard.
+      should_escape: false
+      url: https://your-raider-bot.example.com/slack/events
+    - command: /mystats
+      description: DM your current-month Raider Bot stats.
+      should_escape: false
+      url: https://your-raider-bot.example.com/slack/events
+    - command: /raiderhelp
+      description: Show emoji mappings and Raider Bot scoring rules.
+      should_escape: false
+      url: https://your-raider-bot.example.com/slack/events
 oauth_config:
   scopes:
     bot:
