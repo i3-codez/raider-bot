@@ -61,6 +61,7 @@ describe("reaction scoring flow bootstrap", () => {
     vi.resetModules();
     vi.clearAllMocks();
     vi.unstubAllEnvs();
+    vi.doUnmock("../../src/slack/events/register-reaction-handlers.js");
   });
 
   it("bootstraps reaction handlers through registerEvents(app)", async () => {
@@ -84,6 +85,10 @@ describe("registerReactionHandlers", () => {
     vi.resetModules();
     vi.clearAllMocks();
     vi.unstubAllEnvs();
+    vi.doUnmock("../../src/slack/events/register-reaction-handlers.js");
+    vi.doUnmock("../../src/db/queries/find-raid-by-slack-ref.js");
+    vi.doUnmock("../../src/domain/scoring/claim-engagement.js");
+    vi.doUnmock("../../src/domain/scoring/reverse-engagement.js");
   });
 
   it("maps the canonical reactions to action types and ignores unsupported emoji", async () => {
@@ -140,7 +145,7 @@ describe("registerReactionHandlers", () => {
         slackUserId: "U123",
         slackReaction: mapping.emoji,
         actionType: mapping.actionType,
-        eventTime: new Date("2024-04-10T17:10:00.100Z"),
+        eventTime: new Date("2024-04-10T17:10:00.000Z"),
       });
     }
 
@@ -199,14 +204,14 @@ describe("registerReactionHandlers", () => {
       slackUserId: "U123",
       slackReaction: "memo",
       actionType: "quote_post",
-      eventTime: new Date("2024-04-10T17:10:00.100Z"),
+      eventTime: new Date("2024-04-10T17:10:00.000Z"),
     });
     expect(reverseEngagement).toHaveBeenCalledExactlyOnceWith({
       raid: expect.objectContaining({ id: "raid-2" }),
       slackUserId: "U123",
       slackReaction: "memo",
       actionType: "quote_post",
-      eventTime: new Date("2024-04-10T17:10:00.100Z"),
+      eventTime: new Date("2024-04-10T17:10:00.000Z"),
     });
   });
 
@@ -225,12 +230,7 @@ describe("registerReactionHandlers", () => {
       reverseEngagement,
     }));
 
-    findRaidBySlackRef.mockResolvedValueOnce({
-      id: "raid-3",
-      publishedAt: null,
-      slackPostedAt: new Date("2026-04-10T16:00:05.000Z"),
-    });
-    findRaidBySlackRef.mockResolvedValueOnce(null);
+    findRaidBySlackRef.mockResolvedValue(null);
 
     const { registerReactionHandlers } = await import(
       "../../src/slack/events/register-reaction-handlers.js"

@@ -1,5 +1,7 @@
 import type { App } from "@slack/bolt";
 
-export function registerEvents(_app: App): void {
-  // Later plans register event listeners here.
+import { registerReactionHandlers } from "./events/register-reaction-handlers.js";
+
+export function registerEvents(app: App): void {
+  registerReactionHandlers(app);
 }
