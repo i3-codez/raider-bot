@@ -45,6 +45,8 @@ export const envSchema = z.object({
   SLACK_BOT_TOKEN: z.string().trim().min(1),
   SLACK_SIGNING_SECRET: z.string().trim().min(1),
   SLACK_RAID_CHANNEL_ID: z.string().trim().min(1),
+  SLACK_SUMMARY_CHANNEL_ID: optionalString,
+  SLACK_OPS_CHANNEL_ID: optionalString,
   SLACK_RAID_OPERATOR_USER_IDS: operatorUserIdsSchema,
   PUBLISH_WEBHOOK_SHARED_SECRET: z.string().trim().min(1),
   RAIDER_EXCLUDE_SELF_RAIDS: booleanFlagSchema,

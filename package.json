@@ -11,10 +11,14 @@
     "start": "tsx src/app/server.ts",
     "test": "vitest run",
     "correct:raid-time": "tsx src/scripts/correct-raid-published-at.ts",
+    "summary:daily": "tsx src/scripts/run-summary-job.ts --cadence=daily",
+    "summary:weekly": "tsx src/scripts/run-summary-job.ts --cadence=weekly",
+    "summary:monthly": "tsx src/scripts/run-summary-job.ts --cadence=monthly",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@slack/bolt": "4.7.0",
+    "@slack/web-api": "7.13.0",
     "pino": "10.3.1",
     "postgres": "3.4.9",
     "zod": "4.3.6"
