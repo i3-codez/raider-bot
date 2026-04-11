@@ -25,6 +25,18 @@ interface RaidLookupResult {
   slackPostedAt: Date;
 }
 
+interface EngagementLogRecord {
+  raid_post_id: string;
+  slack_user_id: string;
+  slack_reaction: string;
+  action_type: string;
+  reacted_at: Date;
+  minutes_from_publish: number;
+  scoring_window: string;
+  points_awarded: number;
+  removed_at: Date | null;
+}
+
 function createMockApp() {
   const handlers: RegisteredHandlers = {};
   const app = {
@@ -53,6 +65,102 @@ function buildReactionEvent(overrides: Partial<ReactionEventPayload> = {}): Reac
       ts: "1712768999.000100",
       ...overrides.item,
     },
+  };
+}
+
+function createEngagementSqlHarness() {
+  const rows = new Map<string, EngagementLogRecord>();
+  const statements: string[] = [];
+
+  const sql = vi.fn(
+    async (strings: TemplateStringsArray, ...values: unknown[]): Promise<EngagementLogRecord[]> => {
+      const statement = strings.join("__value__");
+      statements.push(statement);
+
+      if (statement.includes("insert into engagement_logs")) {
+        const [
+          raidPostId,
+          slackUserId,
+          slackReaction,
+          actionType,
+          reactedAt,
+          minutesFromPublish,
+          scoringWindow,
+          pointsAwarded,
+        ] = values as [
+          string,
+          string,
+          string,
+          string,
+          Date,
+          number,
+          string,
+          number,
+        ];
+
+        const key = `${raidPostId}:${slackUserId}:${actionType}`;
+        const existing = rows.get(key);
+
+        if (!existing) {
+          rows.set(key, {
+            raid_post_id: raidPostId,
+            slack_user_id: slackUserId,
+            slack_reaction: slackReaction,
+            action_type: actionType,
+            reacted_at: reactedAt,
+            minutes_from_publish: minutesFromPublish,
+            scoring_window: scoringWindow,
+            points_awarded: pointsAwarded,
+            removed_at: null,
+          });
+
+          return [];
+        }
+
+        if (existing.removed_at) {
+          rows.set(key, {
+            ...existing,
+            slack_reaction: slackReaction,
+            reacted_at: reactedAt,
+            minutes_from_publish: minutesFromPublish,
+            scoring_window: scoringWindow,
+            points_awarded: pointsAwarded,
+            removed_at: null,
+          });
+        }
+
+        return [];
+      }
+
+      if (statement.includes("update engagement_logs")) {
+        const [removedAt, raidPostId, slackUserId, actionType] = values as [
+          Date,
+          string,
+          string,
+          string,
+        ];
+
+        const key = `${raidPostId}:${slackUserId}:${actionType}`;
+        const existing = rows.get(key);
+
+        if (existing && !existing.removed_at) {
+          rows.set(key, {
+            ...existing,
+            removed_at: removedAt,
+          });
+        }
+
+        return [];
+      }
+
+      throw new Error(`Unexpected SQL statement in test harness: ${statement}`);
+    },
+  );
+
+  return {
+    rows,
+    sql,
+    statements,
   };
 }
 
@@ -260,5 +368,193 @@ describe("registerReactionHandlers", () => {
     expect(findRaidBySlackRef).toHaveBeenCalledTimes(2);
     expect(claimEngagement).not.toHaveBeenCalled();
     expect(reverseEngagement).not.toHaveBeenCalled();
+  });
+});
+
+describe("engagement scoring persistence", () => {
+  beforeEach(() => {
+    vi.resetModules();
+    vi.clearAllMocks();
+    vi.unstubAllEnvs();
+    vi.doUnmock("../../src/db/sql.js");
+    vi.doUnmock("../../src/db/queries/engagement-logs.js");
+    vi.doUnmock("../../src/domain/scoring/claim-engagement.js");
+    vi.doUnmock("../../src/domain/scoring/reverse-engagement.js");
+  });
+
+  it("dedupes duplicate deliveries, stacks different actions, preserves removal audit rows, and reactivates the canonical row", async () => {
+    const harness = createEngagementSqlHarness();
+
+    vi.doMock("../../src/db/sql.js", () => ({
+      sql: harness.sql,
+    }));
+
+    const { claimEngagement } = await import("../../src/domain/scoring/claim-engagement.js");
+    const { reverseEngagement } = await import("../../src/domain/scoring/reverse-engagement.js");
+
+    const raid = {
+      id: "raid-1",
+      publishedAt: new Date("2026-04-10T16:00:00.000Z"),
+      slackPostedAt: new Date("2026-04-10T16:00:05.000Z"),
+    };
+
+    await claimEngagement({
+      raid,
+      slackUserId: "U123",
+      slackReaction: "heart",
+      actionType: "like",
+      eventTime: new Date("2026-04-10T16:09:00.000Z"),
+    });
+
+    await claimEngagement({
+      raid,
+      slackUserId: "U123",
+      slackReaction: "heart",
+      actionType: "like",
+      eventTime: new Date("2026-04-10T16:09:30.000Z"),
+    });
+
+    await claimEngagement({
+      raid,
+      slackUserId: "U123",
+      slackReaction: "speech_balloon",
+      actionType: "comment",
+      eventTime: new Date("2026-04-10T16:15:00.000Z"),
+    });
+
+    expect(harness.rows.size).toBe(2);
+
+    const likeRow = harness.rows.get("raid-1:U123:like");
+    const commentRow = harness.rows.get("raid-1:U123:comment");
+
+    expect(likeRow).toMatchObject({
+      slack_reaction: "heart",
+      action_type: "like",
+      minutes_from_publish: 9,
+      scoring_window: "0-10m",
+      points_awarded: 10,
+      removed_at: null,
+    });
+    expect(commentRow).toMatchObject({
+      slack_reaction: "speech_balloon",
+      action_type: "comment",
+      minutes_from_publish: 15,
+      scoring_window: "10-20m",
+      points_awarded: 8,
+      removed_at: null,
+    });
+
+    await reverseEngagement({
+      raid,
+      slackUserId: "U123",
+      slackReaction: "heart",
+      actionType: "like",
+      eventTime: new Date("2026-04-10T16:25:00.000Z"),
+    });
+
+    expect(harness.rows.get("raid-1:U123:like")?.removed_at).toEqual(
+      new Date("2026-04-10T16:25:00.000Z"),
+    );
+
+    await claimEngagement({
+      raid,
+      slackUserId: "U123",
+      slackReaction: "heart",
+      actionType: "like",
+      eventTime: new Date("2026-04-10T16:26:00.000Z"),
+    });
+
+    expect(harness.rows.size).toBe(2);
+    expect(harness.rows.get("raid-1:U123:like")).toMatchObject({
+      slack_reaction: "heart",
+      action_type: "like",
+      minutes_from_publish: 26,
+      scoring_window: "20-30m",
+      points_awarded: 6,
+      removed_at: null,
+    });
+  });
+
+  it("scores against publishedAt when present and falls back to slackPostedAt otherwise", async () => {
+    const harness = createEngagementSqlHarness();
+
+    vi.doMock("../../src/db/sql.js", () => ({
+      sql: harness.sql,
+    }));
+
+    const { claimEngagement } = await import("../../src/domain/scoring/claim-engagement.js");
+
+    await claimEngagement({
+      raid: {
+        id: "raid-published",
+        publishedAt: new Date("2026-04-10T16:00:00.000Z"),
+        slackPostedAt: new Date("2026-04-10T16:05:00.000Z"),
+      },
+      slackUserId: "U123",
+      slackReaction: "repeat",
+      actionType: "repost",
+      eventTime: new Date("2026-04-10T16:31:00.000Z"),
+    });
+
+    await claimEngagement({
+      raid: {
+        id: "raid-fallback",
+        publishedAt: null,
+        slackPostedAt: new Date("2026-04-10T16:05:00.000Z"),
+      },
+      slackUserId: "U456",
+      slackReaction: "memo",
+      actionType: "quote_post",
+      eventTime: new Date("2026-04-10T17:10:00.000Z"),
+    });
+
+    expect(harness.rows.get("raid-published:U123:repost")).toMatchObject({
+      minutes_from_publish: 31,
+      scoring_window: "30-60m",
+      points_awarded: 3,
+    });
+    expect(harness.rows.get("raid-fallback:U456:quote_post")).toMatchObject({
+      minutes_from_publish: 65,
+      scoring_window: "60m+",
+      points_awarded: 0,
+    });
+  });
+
+  it("uses the canonical insert conflict clause and removal update semantics", async () => {
+    const harness = createEngagementSqlHarness();
+
+    vi.doMock("../../src/db/sql.js", () => ({
+      sql: harness.sql,
+    }));
+
+    const { claimEngagementLog, reverseEngagementLog } = await import(
+      "../../src/db/queries/engagement-logs.js"
+    );
+
+    await claimEngagementLog({
+      raidPostId: "raid-1",
+      slackUserId: "U123",
+      slackReaction: "heart",
+      actionType: "like",
+      reactedAt: new Date("2026-04-10T16:09:00.000Z"),
+      minutesFromPublish: 9,
+      scoringWindow: "0-10m",
+      pointsAwarded: 10,
+    });
+
+    await reverseEngagementLog({
+      raidPostId: "raid-1",
+      slackUserId: "U123",
+      actionType: "like",
+      removedAt: new Date("2026-04-10T16:25:00.000Z"),
+    });
+
+    expect(harness.statements[0]).toContain(
+      "on conflict (raid_post_id, slack_user_id, action_type) do update",
+    );
+    expect(harness.statements[0]).toContain("where engagement_logs.removed_at is not null");
+    expect(harness.statements[1]).toContain("update engagement_logs");
+    expect(harness.statements[1]).toContain("set removed_at =");
+    expect(harness.statements[1]).not.toContain("delete from engagement_logs");
   });
 });
