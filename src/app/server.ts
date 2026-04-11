@@ -1,13 +1,19 @@
-import { createServer } from "node:http";
-
 import { env } from "../config/env.js";
 import { logger } from "../lib/logger.js";
+import { createSlackApp } from "./slack.js";
 
-const server = createServer((_request, response) => {
-  response.writeHead(200, { "content-type": "application/json; charset=utf-8" });
-  response.end(JSON.stringify({ service: "raider-bot", status: "ok" }));
-});
+async function main() {
+  const { app } = createSlackApp();
 
-server.listen(env.APP_PORT, () => {
-  logger.info({ port: env.APP_PORT }, "Raider Bot foundation server listening.");
+  await app.start(env.APP_PORT);
+
+  logger.info(
+    { port: env.APP_PORT, endpoint: "/slack/events" },
+    "Raider Bot Slack app listening.",
+  );
+}
+
+void main().catch((error) => {
+  logger.error({ err: error }, "Failed to start Raider Bot Slack app.");
+  process.exitCode = 1;
 });
