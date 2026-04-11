@@ -1,5 +1,9 @@
 import type { App } from "@slack/bolt";
 
-export function registerCommands(_app: App): void {
-  // Later plans register slash commands here.
+import { registerRaidCommand } from "./commands/register-raid-command.js";
+import { registerRaidSubmit } from "./commands/handle-raid-submit.js";
+
+export function registerCommands(app: App): void {
+  registerRaidCommand(app);
+  registerRaidSubmit(app);
 }
