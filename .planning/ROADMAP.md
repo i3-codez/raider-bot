@@ -10,7 +10,7 @@ Raider Bot should ship in three phases: first establish a trustworthy Slack scor
 - Integer phases (1, 2, 3): planned milestone work
 - Decimal phases (2.1, 2.2): urgent insertions if new risks appear later
 
-- [ ] **Phase 1: Slack Core & Trusted Scoring** - establish the raid message loop, scoring engine, and durable audit data. External blocker: linked Supabase push still pending for Plan 01-04.
+- [x] **Phase 1: Slack Core & Trusted Scoring** - establish the raid message loop, scoring engine, and durable audit data. (completed 2026-04-11)
 - [ ] **Phase 2: Publish Automation & Staff Commands** - add webhook ingest, dedupe, roster mapping, and staff-facing command surfaces.
 - [ ] **Phase 3: Reporting, Reminders & Launch Hardening** - add recurring summaries, monthly reset behavior, reminder hooks, and pilot readiness.
 
@@ -25,13 +25,13 @@ Raider Bot should ship in three phases: first establish a trustworthy Slack scor
   2. Staff reactions award at most one score per action type per post, while different action types still stack correctly.
   3. Reaction removal reverses or deactivates the related score without breaking the audit trail.
   4. Raid posts and engagement logs persist enough detail to explain how any Phase 1 score was produced.
-**Plans**: 7 plans
+**Plans**: 7/7 plans complete
 
 Plans:
 - [x] 01-01-PLAN.md — Establish the repo tooling, env validation, logger, and shared time utilities.
 - [x] 01-02-PLAN.md — Add the Slack manifest, Bolt bootstrap, and empty command or event registration shells.
 - [x] 01-03-PLAN.md — Define the shared scoring contracts, emoji registry, and canonical raid-message builder.
-- [ ] 01-04-PLAN.md — Add the Phase 1 Postgres schema, DB helper, and schema verification. Local work complete; blocked on `npx supabase db push --linked` until the CLI is linked to a project.
+- [x] 01-04-PLAN.md — Add the Phase 1 Postgres schema, DB helper, and schema verification. Verified with successful `npx supabase db push --linked` on 2026-04-11.
 - [x] 01-05-PLAN.md — Implement the `/raid` modal flow, manual raid persistence, and canonical Slack posting path.
 - [x] 01-06-PLAN.md — Wire reaction events into explicit handler-to-service scoring, dedupe, and reversal logging.
 - [x] 01-07-PLAN.md — Implement authoritative publish-time correction, score recalculation, and Slack timing-row refresh.
@@ -72,6 +72,6 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Slack Core & Trusted Scoring | 6/7 | Blocked | 01-01, 01-02, 01-03, 01-05, 01-06, 01-07 |
+| 1. Slack Core & Trusted Scoring | 7/7 | Complete    | 2026-04-11 |
 | 2. Publish Automation & Staff Commands | 0/3 | Not started | - |
 | 3. Reporting, Reminders & Launch Hardening | 0/3 | Not started | - |

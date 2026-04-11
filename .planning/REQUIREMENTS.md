@@ -7,21 +7,21 @@
 
 ### Raid Intake
 
-- [ ] **RAID-01**: Operator can create a raid target manually with `/raid` using a post URL, client name, and platform.
+- [x] **RAID-01**: Operator can create a raid target manually with `/raid` using a post URL, client name, and platform.
 - [ ] **RAID-02**: Publishing workflow can create a raid target through an authenticated webhook that includes `published_at`.
-- [ ] **RAID-03**: Each raid post stores `published_at`, `slack_posted_at`, `slack_message_ts`, `slack_channel_id`, `timing_confidence`, and `month_key`.
+- [x] **RAID-03**: Each raid post stores `published_at`, `slack_posted_at`, `slack_message_ts`, `slack_channel_id`, `timing_confidence`, and `month_key`.
 - [ ] **RAID-04**: Duplicate publish events or repeated manual submissions do not create duplicate raid posts.
-- [ ] **RAID-05**: Raider Bot posts each new raid target into the configured Slack channel within minutes of ingest.
-- [ ] **RAID-06**: Each raid target message shows the reaction legend and speed-window rules staff need to participate correctly.
+- [x] **RAID-05**: Raider Bot posts each new raid target into the configured Slack channel within minutes of ingest.
+- [x] **RAID-06**: Each raid target message shows the reaction legend and speed-window rules staff need to participate correctly.
 
 ### Engagement Scoring
 
-- [ ] **ENG-01**: Supported Slack reactions map to like, comment, repost, and quote-post actions.
-- [ ] **ENG-02**: A user can claim each action type at most once per post.
-- [ ] **ENG-03**: Different action types stack on the same post for the same user.
-- [ ] **ENG-04**: Points are calculated from `published_at` using fixed 0-10m, 10-20m, 20-30m, 30-60m, and 60m+ windows.
-- [ ] **ENG-05**: Removing a reaction reverses or deactivates the associated score.
-- [ ] **ENG-06**: Engagement logs retain `reacted_at`, `minutes_from_publish`, `scoring_window`, `points_awarded`, and optional `removed_at`.
+- [x] **ENG-01**: Supported Slack reactions map to like, comment, repost, and quote-post actions.
+- [x] **ENG-02**: A user can claim each action type at most once per post.
+- [x] **ENG-03**: Different action types stack on the same post for the same user.
+- [x] **ENG-04**: Points are calculated from `published_at` using fixed 0-10m, 10-20m, 20-30m, 30-60m, and 60m+ windows.
+- [x] **ENG-05**: Removing a reaction reverses or deactivates the associated score.
+- [x] **ENG-06**: Engagement logs retain `reacted_at`, `minutes_from_publish`, `scoring_window`, `points_awarded`, and optional `removed_at`.
 - [ ] **ENG-07**: Self-raids can be excluded when a post owner is known and the rule is enabled.
 
 ### Team & Commands
@@ -63,16 +63,16 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| RAID-01 | Phase 1 | Pending |
-| RAID-03 | Phase 1 | Pending |
-| RAID-05 | Phase 1 | Pending |
-| RAID-06 | Phase 1 | Pending |
-| ENG-01 | Phase 1 | Pending |
-| ENG-02 | Phase 1 | Pending |
-| ENG-03 | Phase 1 | Pending |
-| ENG-04 | Phase 1 | Pending |
-| ENG-05 | Phase 1 | Pending |
-| ENG-06 | Phase 1 | Pending |
+| RAID-01 | Phase 1 | Complete |
+| RAID-03 | Phase 1 | Complete |
+| RAID-05 | Phase 1 | Complete |
+| RAID-06 | Phase 1 | Complete |
+| ENG-01 | Phase 1 | Complete |
+| ENG-02 | Phase 1 | Complete |
+| ENG-03 | Phase 1 | Complete |
+| ENG-04 | Phase 1 | Complete |
+| ENG-05 | Phase 1 | Complete |
+| ENG-06 | Phase 1 | Complete |
 | RAID-02 | Phase 2 | Pending |
 | RAID-04 | Phase 2 | Pending |
 | ENG-07 | Phase 2 | Pending |
@@ -92,4 +92,4 @@
 
 ---
 *Requirements defined: 2026-04-10*
-*Last updated: 2026-04-10 after initial definition*
+*Last updated: 2026-04-11 after Phase 1 completion*
