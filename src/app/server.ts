@@ -1,6 +1,7 @@
 import { env } from "../config/env.js";
 import { logger } from "../lib/logger.js";
-import { createSlackApp } from "./slack.js";
+import { createSlackApp, SLACK_EVENTS_ENDPOINT } from "./slack.js";
+import { PUBLISH_WEBHOOK_ENDPOINT } from "./publish-webhook.js";
 
 async function main() {
   const { app } = createSlackApp();
@@ -8,7 +9,7 @@ async function main() {
   await app.start(env.APP_PORT);
 
   logger.info(
-    { port: env.APP_PORT, endpoint: "/slack/events" },
+    { port: env.APP_PORT, endpoints: [SLACK_EVENTS_ENDPOINT, PUBLISH_WEBHOOK_ENDPOINT] },
     "Raider Bot Slack app listening.",
   );
 }

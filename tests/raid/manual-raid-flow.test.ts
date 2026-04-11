@@ -66,6 +66,7 @@ describe("createManualRaid", () => {
       SLACK_SIGNING_SECRET: "test-signing-secret",
       SLACK_RAID_CHANNEL_ID: "C_RAIDS",
       SLACK_RAID_OPERATOR_USER_IDS: "U_OPERATOR",
+      PUBLISH_WEBHOOK_SHARED_SECRET: "publish-secret",
     };
     vi.resetModules();
   });
@@ -111,6 +112,7 @@ describe("createManualRaid", () => {
           },
         },
         now: () => slackPostedAt,
+        findRaidByDedupeKey: vi.fn().mockResolvedValue(null),
         insertRaidPost,
       },
     );
@@ -171,6 +173,7 @@ describe("createManualRaid", () => {
           },
         },
         now: () => slackPostedAt,
+        findRaidByDedupeKey: vi.fn().mockResolvedValue(null),
         insertRaidPost,
       },
     );
@@ -216,6 +219,7 @@ describe("raid modal submit flow", () => {
       SLACK_SIGNING_SECRET: "test-signing-secret",
       SLACK_RAID_CHANNEL_ID: "C_RAIDS",
       SLACK_RAID_OPERATOR_USER_IDS: "U_OPERATOR",
+      PUBLISH_WEBHOOK_SHARED_SECRET: "publish-secret",
     };
     vi.resetModules();
   });

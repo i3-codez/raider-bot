@@ -36,6 +36,7 @@ export const envSchema = z.object({
   SLACK_SIGNING_SECRET: z.string().trim().min(1),
   SLACK_RAID_CHANNEL_ID: z.string().trim().min(1),
   SLACK_RAID_OPERATOR_USER_IDS: operatorUserIdsSchema,
+  PUBLISH_WEBHOOK_SHARED_SECRET: z.string().trim().min(1),
   SLACK_APP_TOKEN: optionalString,
   LOG_LEVEL: z
     .enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"])

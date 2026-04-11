@@ -13,4 +13,15 @@ export interface RaidPost {
   slackChannelId: string;
   timingConfidence: RaidTimingConfidence;
   monthKey: string;
+  normalizedPostUrl?: string;
+  sourceEventId?: string | null;
+  ownerExternalId?: string | null;
+  ownerDisplayName?: string | null;
+  ownerSlackUserId?: string | null;
+}
+
+export interface RaidOwnerMetadata {
+  ownerExternalId?: string | null;
+  ownerDisplayName?: string | null;
+  ownerSlackUserId?: string | null;
 }
