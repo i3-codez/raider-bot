@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+import { pathToFileURL } from "node:url";
+
 import { closeSql } from "../db/sql.js";
 import { publishSummaryJob } from "../jobs/publish-summary.js";
 import { createSlackClient } from "../slack/client.js";
@@ -59,12 +61,14 @@ async function main() {
   await runSummaryJobCommand(process.argv.slice(2));
 }
 
-try {
-  await main();
-} catch (error) {
-  const message = error instanceof Error ? error.message : "Unknown summary job failure.";
-  console.error(`Summary job failed: ${message}`);
-  process.exitCode = 1;
-} finally {
-  await closeSql({ timeout: 0 });
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  try {
+    await main();
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown summary job failure.";
+    console.error(`Summary job failed: ${message}`);
+    process.exitCode = 1;
+  } finally {
+    await closeSql({ timeout: 0 });
+  }
 }
