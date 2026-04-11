@@ -33,10 +33,10 @@
 
 ### Reporting & Operations
 
-- [ ] **RPT-01**: Daily, weekly, and monthly summary jobs can publish leaderboard summaries on schedule.
-- [ ] **RPT-02**: Monthly scoring resets on the first of the month while historical logs remain queryable.
-- [ ] **RPT-03**: Leaderboards and summaries include total points, unique raid posts engaged, early-window actions, and early-window action rate.
-- [ ] **RPT-04**: Low-confidence timing and weak first-30-minute participation can be surfaced in ops summaries or reminders.
+- [x] **RPT-01**: Daily, weekly, and monthly summary jobs can publish leaderboard summaries on schedule.
+- [x] **RPT-02**: Monthly scoring resets on the first of the month while historical logs remain queryable.
+- [x] **RPT-03**: Leaderboards and summaries include total points, unique raid posts engaged, early-window actions, and early-window action rate.
+- [x] **RPT-04**: Low-confidence timing and weak first-30-minute participation can be surfaced in ops summaries or reminders.
 
 ## v2 Requirements
 
@@ -80,10 +80,10 @@
 | TEAM-02 | Phase 2 | Complete |
 | TEAM-03 | Phase 2 | Complete |
 | TEAM-04 | Phase 2 | Complete |
-| RPT-01 | Phase 3 | Pending |
-| RPT-02 | Phase 3 | Pending |
-| RPT-03 | Phase 3 | Pending |
-| RPT-04 | Phase 3 | Pending |
+| RPT-01 | Phase 3 | Complete |
+| RPT-02 | Phase 3 | Complete |
+| RPT-03 | Phase 3 | Complete |
+| RPT-04 | Phase 3 | Complete |
 
 **Coverage:**
 - v1 requirements: 21 total
@@ -92,4 +92,4 @@
 
 ---
 *Requirements defined: 2026-04-10*
-*Last updated: 2026-04-11 after Phase 2 completion*
+*Last updated: 2026-04-11 after Phase 3 completion*

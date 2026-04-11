@@ -12,7 +12,7 @@ Raider Bot should ship in three phases: first establish a trustworthy Slack scor
 
 - [x] **Phase 1: Slack Core & Trusted Scoring** - establish the raid message loop, scoring engine, and durable audit data. (completed 2026-04-11)
 - [x] **Phase 2: Publish Automation & Staff Commands** - add webhook ingest, dedupe, roster mapping, and staff-facing command surfaces. (completed 2026-04-11)
-- [ ] **Phase 3: Reporting, Reminders & Launch Hardening** - add recurring summaries, monthly reset behavior, reminder hooks, and pilot readiness.
+- [x] **Phase 3: Reporting, Reminders & Launch Hardening** - add recurring summaries, monthly reset behavior, reminder hooks, and pilot readiness. (completed 2026-04-11)
 
 ## Phase Details
 
@@ -61,12 +61,12 @@ Plans:
   2. Monthly reset logic starts a new score window without losing historical raid and engagement data.
   3. Low-confidence timing and weak first-30-minute participation can be surfaced automatically for ops follow-up.
   4. The bot is validated in a private pilot channel with verified scopes, scheduler ownership, and predictable report behavior.
-**Plans**: 3 plans
+**Plans**: 3/3 plans complete
 
 Plans:
-- [ ] 03-01: Implement scheduled summary jobs and reusable reporting payloads.
-- [ ] 03-02: Add monthly reset, snapshotting, and low-participation or low-confidence reminder logic.
-- [ ] 03-03: Complete pilot UAT, deployment hardening, and ops-facing launch documentation.
+- [x] 03-01: Implement scheduled summary jobs and reusable reporting payloads.
+- [x] 03-02: Add monthly reset, snapshotting, and low-participation or low-confidence reminder logic.
+- [x] 03-03: Complete pilot UAT, deployment hardening, and ops-facing launch documentation.
 
 ## Progress
 
@@ -74,4 +74,4 @@ Plans:
 |-------|----------------|--------|-----------|
 | 1. Slack Core & Trusted Scoring | 7/7 | Complete    | 2026-04-11 |
 | 2. Publish Automation & Staff Commands | 3/3 | Complete    | 2026-04-11 |
-| 3. Reporting, Reminders & Launch Hardening | 0/3 | Not started | - |
+| 3. Reporting, Reminders & Launch Hardening | 3/3 | Complete    | 2026-04-11 |
