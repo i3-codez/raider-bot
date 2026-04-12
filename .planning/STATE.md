@@ -1,11 +1,11 @@
 ---
 gsd_state_version: 1.0
 milestone: v1.0
-milestone_name: milestone
+milestone_name: Raider Bot MVP
 status: completed
-stopped_at: Phase 3 complete; all roadmap phases complete
-last_updated: "2026-04-11T12:19:00.000Z"
-last_activity: 2026-04-11
+stopped_at: Milestone v1.0 archived; ready for next milestone planning and pilot follow-through
+last_updated: "2026-04-12T02:38:33Z"
+last_activity: 2026-04-12
 progress:
   total_phases: 3
   completed_phases: 3
@@ -18,17 +18,17 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-04-10)
+See: .planning/PROJECT.md (updated 2026-04-12)
 
 **Core value:** A newly published client post reaches the right staff in Slack fast enough that meaningful engagement happens inside the first 30 minutes.
-**Current focus:** Milestone complete — all roadmap phases delivered
+**Current focus:** Define the next milestone and schedule credentialed pilot validation follow-through
 
 ## Current Position
 
 Phase: Complete
 Plan: Complete
-Status: Phase 3 complete; milestone ready for closeout or next planning cycle
-Last activity: 2026-04-11 -- Phase 3 completed with green tests and linked Supabase push
+Status: Milestone archived and tagged; planning next milestone
+Last activity: 2026-04-12
 
 Progress: [##########] 100%
 
@@ -51,7 +51,7 @@ Progress: [##########] 100%
 **Recent Trend:**
 
 - Last 5 plans: 03-01, 03-01, 03-02, 03-02, 03-03
-- Trend: Phase 3 completed end-to-end with full-suite green tests, pilot runbook coverage, and linked Supabase schema verification
+- Trend: v1.0 shipped cleanly in code; remaining risk is limited to post-ship pilot validation in a real environment
 
 ## Accumulated Context
 
@@ -74,17 +74,22 @@ Recent decisions affecting current work:
 - Phase 3 execution: scheduled daily, weekly, and monthly summary jobs now run from ET-aware completed windows with dry-run-safe script entrypoints.
 - Phase 3 execution: month-close snapshots and ops surfacing now persist durable scheduler state without mutating canonical raid or engagement logs.
 - Phase 3 execution: `npm run pilot:check` and `docs/pilot-launch-runbook.md` now cover private-pilot validation and Railway cron ownership.
+- Milestone audit: Phase 1 and Phase 2 verification passed, and Phase 3 verification is `human_needed` only for credentialed private-pilot execution outside this shell.
+- Milestone audit: `npm run typecheck` and `npx vitest run` passed on 2026-04-11 during closeout verification.
+- Milestone closeout: v1.0 was archived on 2026-04-12 with roadmap, requirements, and audit history preserved under `.planning/milestones/`.
 
 ### Pending Todos
 
-None yet.
+- Start the next milestone with `/gsd-new-milestone`.
+- Run the private-pilot checklist in a credentialed Slack/Supabase environment.
 
 ### Blockers/Concerns
 
 - Slack credentials and real workspace configuration are still required before live Slack integration can be exercised beyond local tests.
+- `npm run pilot:check` still requires `DATABASE_URL`, Slack credentials, channel IDs, and `PUBLISH_WEBHOOK_SHARED_SECRET` in the target environment.
 
 ## Session Continuity
 
-Last session: 2026-04-11T12:19:00.000Z
-Stopped at: Phase 3 complete; all roadmap phases complete
-Resume file: .planning/ROADMAP.md
+Last session: 2026-04-12T02:38:33Z
+Stopped at: Milestone v1.0 archived; next milestone definition pending
+Resume file: .planning/PROJECT.md
