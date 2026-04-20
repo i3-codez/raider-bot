@@ -23,6 +23,7 @@ Scheduled job entry points (all accept `--dry-run`; `run-month-close.ts` also ac
 npm run summary:daily | summary:weekly | summary:monthly
 npm run month:close
 npm run ops:surfacing
+npm run monitor:x                   # poll Apify for new tweets and fire raids
 npm run pilot:check                 # env + Slack + DB smoke test, used before widening pilot
 npm run correct:raid-time           # fix a raid's published_at
 ```

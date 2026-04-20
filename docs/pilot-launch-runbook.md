@@ -95,12 +95,14 @@ The repo ships with both a `Dockerfile` and a `nixpacks.toml`. Pick one in your 
 - `SLACK_RAID_CHANNEL_ID`
 - `SLACK_RAID_OPERATOR_USER_IDS`
 - `PUBLISH_WEBHOOK_SHARED_SECRET`
+- `APIFY_TOKEN` — Apify account token (Apify → Settings → Integrations → Personal API tokens).
 
 Optional:
 
 - `SLACK_SUMMARY_CHANNEL_ID`, `SLACK_OPS_CHANNEL_ID`
 - `RAIDER_EXCLUDE_SELF_RAIDS`
 - `LOG_LEVEL` (default `info`)
+- `APIFY_X_MONITOR_ACTOR_ID` — Apify actor slug (defaults to `danek~twitter-scraper-ppr`).
 
 ### Migrations
 
@@ -124,6 +126,7 @@ Coolify → Scheduled Tasks (per service). Add one entry per job; each exits on 
 | Monthly summary | `0 14 1 * *` ET | `npm run summary:monthly` |
 | Month close | a few minutes after monthly summary | `npm run month:close` |
 | Ops surfacing | your chosen cadence | `npm run ops:surfacing` |
+| X tweet monitor | `*/2 * * * *` | `npm run monitor:x` |
 
 Coolify's cron scheduler runs in UTC — add or subtract the offset (ET = UTC-5 in standard, UTC-4 in daylight) when you set the expression, or hard-code slightly later UTC times and accept the DST drift.
 
