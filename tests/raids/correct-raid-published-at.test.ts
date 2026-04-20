@@ -7,7 +7,6 @@ import {
   type RaidPostRecord,
   type RaidTimingCorrectionRecord,
 } from "../../src/domain/raids/correct-raid-published-at.js";
-import { toEasternLabel } from "../../src/lib/time.js";
 
 interface InMemoryStore extends CorrectionStore {
   correctionRows: RaidTimingCorrectionRecord[];
@@ -202,13 +201,13 @@ describe("correctRaidPublishedAt", () => {
     expect(payload).toMatchObject({
       channel: "C123",
       ts: "1712751600.000100",
-      text: expect.stringContaining("Published:"),
+      text: expect.stringContaining("New post from"),
     });
-    expect(payload.blocks[2]).toMatchObject({
+    expect(payload.blocks[0]).toMatchObject({
       type: "section",
       text: {
         type: "mrkdwn",
-        text: `Published: ${toEasternLabel(correctedPublishedAt)} ET`,
+        text: expect.stringContaining("just shipped: go go go!"),
       },
     });
   });
