@@ -13,6 +13,7 @@ describe("resolvePostOwner", () => {
       SLACK_RAID_OPERATOR_USER_IDS: "U_OPERATOR",
       PUBLISH_WEBHOOK_SHARED_SECRET: "publish-secret",
       RAIDER_EXCLUDE_SELF_RAIDS: "false",
+      APIFY_TOKEN: "test-apify-token",
     };
     vi.resetModules();
   });
@@ -81,6 +82,7 @@ describe("claimEngagement self-raid exclusion", () => {
       SLACK_RAID_OPERATOR_USER_IDS: "U_OPERATOR",
       PUBLISH_WEBHOOK_SHARED_SECRET: "publish-secret",
       RAIDER_EXCLUDE_SELF_RAIDS: "true",
+      APIFY_TOKEN: "test-apify-token",
     };
     vi.resetModules();
   });

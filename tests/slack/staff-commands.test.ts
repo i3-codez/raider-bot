@@ -50,6 +50,7 @@ describe("staff command handlers", () => {
       SLACK_RAID_OPERATOR_USER_IDS: "U_OPERATOR",
       PUBLISH_WEBHOOK_SHARED_SECRET: "publish-secret",
       RAIDER_EXCLUDE_SELF_RAIDS: "false",
+      APIFY_TOKEN: "test-apify-token",
     };
     vi.resetModules();
     vi.doUnmock("../../src/slack/commands/register-leaderboard-command.js");

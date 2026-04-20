@@ -13,6 +13,7 @@ describe("summary reporting queries", () => {
       SLACK_RAID_OPERATOR_USER_IDS: "U_OPERATOR",
       PUBLISH_WEBHOOK_SHARED_SECRET: "publish-secret",
       RAIDER_EXCLUDE_SELF_RAIDS: "false",
+      APIFY_TOKEN: "test-apify-token",
     };
     vi.resetModules();
   });
@@ -87,6 +88,7 @@ describe("summary reporting services", () => {
       SLACK_RAID_OPERATOR_USER_IDS: "U_OPERATOR",
       PUBLISH_WEBHOOK_SHARED_SECRET: "publish-secret",
       RAIDER_EXCLUDE_SELF_RAIDS: "false",
+      APIFY_TOKEN: "test-apify-token",
     };
     vi.resetModules();
   });

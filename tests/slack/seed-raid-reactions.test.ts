@@ -12,6 +12,7 @@ describe("seedRaidReactions", () => {
       SLACK_RAID_CHANNEL_ID: "C_RAIDS",
       SLACK_RAID_OPERATOR_USER_IDS: "U_OPERATOR",
       PUBLISH_WEBHOOK_SHARED_SECRET: "publish-secret",
+      APIFY_TOKEN: "test-apify-token",
     };
     vi.resetModules();
   });

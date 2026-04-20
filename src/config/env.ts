@@ -48,6 +48,8 @@ export const envSchema = z.object({
   SLACK_SUMMARY_CHANNEL_ID: optionalString,
   SLACK_OPS_CHANNEL_ID: optionalString,
   SLACK_RAID_OPERATOR_USER_IDS: operatorUserIdsSchema,
+  APIFY_TOKEN: z.string().trim().min(1),
+  APIFY_X_MONITOR_ACTOR_ID: z.string().trim().min(1).default("danek~twitter-scraper-ppr"),
   PUBLISH_WEBHOOK_SHARED_SECRET: z.string().trim().min(1),
   RAIDER_EXCLUDE_SELF_RAIDS: booleanFlagSchema,
   SLACK_APP_TOKEN: optionalString,
