@@ -16,6 +16,7 @@
     "summary:monthly": "tsx src/scripts/run-summary-job.ts --cadence=monthly",
     "month:close": "tsx src/scripts/run-month-close.ts",
     "ops:surfacing": "tsx src/scripts/run-ops-surfacing.ts",
+    "monitor:x": "tsx src/scripts/run-x-monitor.ts",
     "pilot:check": "tsx src/scripts/run-pilot-check.ts",
     "typecheck": "tsc --noEmit"
   },

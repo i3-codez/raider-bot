@@ -3,14 +3,16 @@
 import { pathToFileURL } from "node:url";
 
 import { closeSql } from "../db/sql.js";
-import { runSummaryJobCommand } from "./run-summary-job.js";
 import { runMonthCloseCommand } from "./run-month-close.js";
 import { runOpsSurfacingCommand } from "./run-ops-surfacing.js";
+import { runSummaryJobCommand } from "./run-summary-job.js";
+import { runXMonitorCommand } from "./run-x-monitor.js";
 
 export interface RunPilotCheckDependencies {
   runSummaryJobCommand?: typeof runSummaryJobCommand;
   runMonthCloseCommand?: typeof runMonthCloseCommand;
   runOpsSurfacingCommand?: typeof runOpsSurfacingCommand;
+  runXMonitorCommand?: typeof runXMonitorCommand;
   stdout?: Pick<typeof console, "log">;
 }
 
@@ -45,7 +47,16 @@ export async function runPilotCheck(
   await runMonthClose(["--dry-run"], { stdout });
   await runOpsSurfacing(["--dry-run"], { stdout });
 
-  stdout.log("Pilot check passed: summary, month-close, and ops dry-run flows all completed.");
+  const runXMonitorCmd = assertCommand(
+    dependencies.runXMonitorCommand ?? runXMonitorCommand,
+    "runXMonitorCommand",
+  );
+  const xMonitorExit = await runXMonitorCmd(["--dry-run"], { stdout });
+  if (xMonitorExit !== 0) {
+    throw new Error("x-monitor dry-run reported failures.");
+  }
+
+  stdout.log("Pilot check passed: summary, month-close, ops, and x-monitor dry-run flows all completed.");
 }
 
 async function main() {

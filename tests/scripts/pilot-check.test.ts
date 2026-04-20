@@ -13,6 +13,7 @@ beforeEach(() => {
     PUBLISH_WEBHOOK_SHARED_SECRET: "publish-secret",
     RAIDER_EXCLUDE_SELF_RAIDS: "false",
     APIFY_TOKEN: "test-apify-token",
+    APIFY_X_MONITOR_ACTOR_ID: "danek~twitter-scraper-ppr",
   };
   vi.resetModules();
 });
@@ -28,6 +29,7 @@ describe("runPilotCheck", () => {
     const runSummaryJobCommand = vi.fn().mockResolvedValue(undefined);
     const runMonthCloseCommand = vi.fn().mockResolvedValue(undefined);
     const runOpsSurfacingCommand = vi.fn().mockResolvedValue(undefined);
+    const runXMonitorCommand = vi.fn().mockResolvedValue(0);
     const stdout = {
       log: vi.fn(),
     };
@@ -36,6 +38,7 @@ describe("runPilotCheck", () => {
       runSummaryJobCommand,
       runMonthCloseCommand,
       runOpsSurfacingCommand,
+      runXMonitorCommand,
       stdout,
     });
 
@@ -56,8 +59,9 @@ describe("runPilotCheck", () => {
     );
     expect(runMonthCloseCommand).toHaveBeenCalledWith(["--dry-run"], { stdout });
     expect(runOpsSurfacingCommand).toHaveBeenCalledWith(["--dry-run"], { stdout });
+    expect(runXMonitorCommand).toHaveBeenCalledWith(["--dry-run"], { stdout });
     expect(stdout.log).toHaveBeenCalledWith(
-      "Pilot check passed: summary, month-close, and ops dry-run flows all completed.",
+      "Pilot check passed: summary, month-close, ops, and x-monitor dry-run flows all completed.",
     );
   });
 
