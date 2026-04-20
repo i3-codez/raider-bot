@@ -8,6 +8,7 @@ import {
 } from "../../db/queries/insert-raid-post.js";
 import { deriveMonthKey } from "../../lib/time.js";
 import { buildRaidMessage } from "../../slack/blocks/build-raid-message.js";
+import { seedRaidReactions } from "../../slack/lib/seed-raid-reactions.js";
 import { correctRaidPublishedAt } from "./correct-raid-published-at.js";
 import type { Platform, RaidOwnerMetadata, RaidPost } from "./types.js";
 
@@ -32,6 +33,9 @@ export interface SlackClientLike {
       blocks: unknown[];
     }): Promise<unknown>;
   };
+  reactions?: {
+    add(payload: { channel: string; timestamp: string; name: string }): Promise<unknown>;
+  };
 }
 
 export interface CreateRaidInput extends RaidOwnerMetadata {
@@ -52,6 +56,7 @@ export interface CreateRaidContext {
   findRaidByDedupeKey?: typeof findRaidByDedupeKey;
   correctRaidPublishedAt?: typeof correctRaidPublishedAt;
   withDedupeLock?: DedupeLockRunner;
+  seedRaidReactions?: typeof seedRaidReactions;
 }
 
 async function defaultWithDedupeLock<T>(
@@ -200,8 +205,18 @@ export async function createRaid(
       blocks: message.blocks,
     });
 
-    return (context.insertRaidPost ?? insertRaidPost)(
+    const raid = await (context.insertRaidPost ?? insertRaidPost)(
       buildInsertInput(input, context, slackPostedAt, response),
     );
+
+    if (context.client.reactions) {
+      await (context.seedRaidReactions ?? seedRaidReactions)(
+        context.client as Parameters<typeof seedRaidReactions>[0],
+        raid.slackChannelId,
+        raid.slackMessageTs,
+      );
+    }
+
+    return raid;
   });
 }

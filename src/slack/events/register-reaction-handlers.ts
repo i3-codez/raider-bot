@@ -14,8 +14,12 @@ function parseSlackEventTime(eventTs: string): Date {
 }
 
 export function registerReactionHandlers(app: App): void {
-  app.event("reaction_added", async ({ event }) => {
+  app.event("reaction_added", async ({ event, context }) => {
     if (event.item.type !== "message") {
+      return;
+    }
+
+    if (context?.botUserId && event.user === context.botUserId) {
       return;
     }
 
@@ -43,8 +47,12 @@ export function registerReactionHandlers(app: App): void {
     });
   });
 
-  app.event("reaction_removed", async ({ event }) => {
+  app.event("reaction_removed", async ({ event, context }) => {
     if (event.item.type !== "message") {
+      return;
+    }
+
+    if (context?.botUserId && event.user === context.botUserId) {
       return;
     }
 

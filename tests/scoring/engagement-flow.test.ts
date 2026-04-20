@@ -3,9 +3,13 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 type ReactionEventName = "reaction_added" | "reaction_removed";
 
+interface ReactionHandlerContext {
+  botUserId?: string;
+}
+
 interface RegisteredHandlers {
-  reaction_added?: (args: { event: ReactionEventPayload }) => Promise<void>;
-  reaction_removed?: (args: { event: ReactionEventPayload }) => Promise<void>;
+  reaction_added?: (args: { event: ReactionEventPayload; context?: ReactionHandlerContext }) => Promise<void>;
+  reaction_removed?: (args: { event: ReactionEventPayload; context?: ReactionHandlerContext }) => Promise<void>;
 }
 
 interface ReactionEventPayload {
@@ -366,6 +370,43 @@ describe("registerReactionHandlers", () => {
     });
 
     expect(findRaidBySlackRef).toHaveBeenCalledTimes(2);
+    expect(claimEngagement).not.toHaveBeenCalled();
+    expect(reverseEngagement).not.toHaveBeenCalled();
+  });
+
+  it("ignores reactions from the bot itself so seed reactions don't self-score", async () => {
+    const findRaidBySlackRef = vi.fn();
+    const claimEngagement = vi.fn();
+    const reverseEngagement = vi.fn();
+
+    vi.doMock("../../src/db/queries/find-raid-by-slack-ref.js", () => ({
+      findRaidBySlackRef,
+    }));
+    vi.doMock("../../src/domain/scoring/claim-engagement.js", () => ({
+      claimEngagement,
+    }));
+    vi.doMock("../../src/domain/scoring/reverse-engagement.js", () => ({
+      reverseEngagement,
+    }));
+
+    const { registerReactionHandlers } = await import(
+      "../../src/slack/events/register-reaction-handlers.js"
+    );
+    const { app, handlers } = createMockApp();
+
+    registerReactionHandlers(app);
+
+    await handlers.reaction_added?.({
+      event: buildReactionEvent({ user: "U_BOT", reaction: "heart" }),
+      context: { botUserId: "U_BOT" },
+    });
+
+    await handlers.reaction_removed?.({
+      event: buildReactionEvent({ user: "U_BOT", reaction: "heart" }),
+      context: { botUserId: "U_BOT" },
+    });
+
+    expect(findRaidBySlackRef).not.toHaveBeenCalled();
     expect(claimEngagement).not.toHaveBeenCalled();
     expect(reverseEngagement).not.toHaveBeenCalled();
   });
