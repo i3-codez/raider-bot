@@ -18,6 +18,7 @@ export function createSqlClient(databaseUrl: string = env.DATABASE_URL) {
   return postgres(connectionString, {
     max: DEFAULT_MAX_CONNECTIONS,
     idle_timeout: DEFAULT_IDLE_TIMEOUT_SECONDS,
+    ssl: "require",
   });
 }
 

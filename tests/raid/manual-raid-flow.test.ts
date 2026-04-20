@@ -114,6 +114,7 @@ describe("createManualRaid", () => {
         now: () => slackPostedAt,
         findRaidByDedupeKey: vi.fn().mockResolvedValue(null),
         insertRaidPost,
+        withDedupeLock: async (_key, cb) => cb(),
       },
     );
 
@@ -175,6 +176,7 @@ describe("createManualRaid", () => {
         now: () => slackPostedAt,
         findRaidByDedupeKey: vi.fn().mockResolvedValue(null),
         insertRaidPost,
+        withDedupeLock: async (_key, cb) => cb(),
       },
     );
 

@@ -8,19 +8,19 @@ features:
     - command: /raid
       description: Create a new raid target in the configured raid channel.
       should_escape: false
-      url: https://your-raider-bot.example.com/slack/events
+      url: https://raider-bot.impact3.co/slack/events
     - command: /leaderboard
       description: Show the current monthly Raider Bot leaderboard.
       should_escape: false
-      url: https://your-raider-bot.example.com/slack/events
+      url: https://raider-bot.impact3.co/slack/events
     - command: /mystats
       description: DM your current-month Raider Bot stats.
       should_escape: false
-      url: https://your-raider-bot.example.com/slack/events
+      url: https://raider-bot.impact3.co/slack/events
     - command: /raiderhelp
       description: Show emoji mappings and Raider Bot scoring rules.
       should_escape: false
-      url: https://your-raider-bot.example.com/slack/events
+      url: https://raider-bot.impact3.co/slack/events
 oauth_config:
   scopes:
     bot:
@@ -29,13 +29,13 @@ oauth_config:
       - reactions:read
 settings:
   event_subscriptions:
-    request_url: https://your-raider-bot.example.com/slack/events
+    request_url: https://raider-bot.impact3.co/slack/events
     bot_events:
       - reaction_added
       - reaction_removed
   interactivity:
     is_enabled: true
-    request_url: https://your-raider-bot.example.com/slack/events
+    request_url: https://raider-bot.impact3.co/slack/events
   org_deploy_enabled: false
   socket_mode_enabled: false
   token_rotation_enabled: false

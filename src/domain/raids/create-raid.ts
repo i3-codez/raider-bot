@@ -1,4 +1,5 @@
 import { env } from "../../config/env.js";
+import { getSql } from "../../db/sql.js";
 import { findRaidByDedupeKey, normalizePostUrl } from "../../db/queries/find-raid-by-dedupe-key.js";
 import {
   insertRaidPost,
@@ -42,12 +43,29 @@ export interface CreateRaidInput extends RaidOwnerMetadata {
   sourceEventId?: string | null;
 }
 
+export type DedupeLockRunner = <T>(dedupeKey: string, callback: () => Promise<T>) => Promise<T>;
+
 export interface CreateRaidContext {
   client: SlackClientLike;
   now?: () => Date;
   insertRaidPost?: (input: InsertRaidPostInput) => Promise<RaidPost>;
   findRaidByDedupeKey?: typeof findRaidByDedupeKey;
   correctRaidPublishedAt?: typeof correctRaidPublishedAt;
+  withDedupeLock?: DedupeLockRunner;
+}
+
+async function defaultWithDedupeLock<T>(
+  dedupeKey: string,
+  callback: () => Promise<T>,
+): Promise<T> {
+  return getSql().begin(async (tx) => {
+    await tx`select pg_advisory_xact_lock(hashtextextended(${dedupeKey}, 0))`;
+    return callback();
+  }) as Promise<T>;
+}
+
+function buildDedupeKey(platform: Platform, postUrl: string): string {
+  return `raid:${platform}:${normalizePostUrl(postUrl)}`;
 }
 
 function buildInsertInput(
@@ -122,63 +140,68 @@ export async function createRaid(
   input: CreateRaidInput,
   context: CreateRaidContext,
 ): Promise<RaidPost> {
-  const dedupeLookup = context.findRaidByDedupeKey ?? findRaidByDedupeKey;
-  const existingRaid = await dedupeLookup({
-    platform: input.platform,
-    postUrl: input.postUrl,
-    sourceEventId: input.sourceEventId ?? null,
-  });
+  const withDedupeLock = context.withDedupeLock ?? defaultWithDedupeLock;
+  const dedupeKey = buildDedupeKey(input.platform, input.postUrl);
 
-  if (existingRaid) {
-    let raid = existingRaid;
+  return withDedupeLock(dedupeKey, async () => {
+    const dedupeLookup = context.findRaidByDedupeKey ?? findRaidByDedupeKey;
+    const existingRaid = await dedupeLookup({
+      platform: input.platform,
+      postUrl: input.postUrl,
+      sourceEventId: input.sourceEventId ?? null,
+    });
 
-    if (shouldApplyWebhookMetadata(input)) {
-      raid = await updateRaidPostWebhookMetadata({
-        raidPostId: existingRaid.id,
-        normalizedPostUrl: normalizePostUrl(input.postUrl),
-        sourceEventId: input.sourceEventId ?? null,
-        ownerExternalId: input.ownerExternalId ?? null,
-        ownerDisplayName: input.ownerDisplayName ?? null,
-        ownerSlackUserId: input.ownerSlackUserId ?? null,
-      });
+    if (existingRaid) {
+      let raid = existingRaid;
+
+      if (shouldApplyWebhookMetadata(input)) {
+        raid = await updateRaidPostWebhookMetadata({
+          raidPostId: existingRaid.id,
+          normalizedPostUrl: normalizePostUrl(input.postUrl),
+          sourceEventId: input.sourceEventId ?? null,
+          ownerExternalId: input.ownerExternalId ?? null,
+          ownerDisplayName: input.ownerDisplayName ?? null,
+          ownerSlackUserId: input.ownerSlackUserId ?? null,
+        });
+      }
+
+      if (
+        input.publishedAt &&
+        raid.timingConfidence === "low" &&
+        typeof context.client.chat.update === "function"
+      ) {
+        const corrected = await (context.correctRaidPublishedAt ?? correctRaidPublishedAt)({
+          raidPostId: raid.id,
+          publishedAt: input.publishedAt,
+          correctedBy: input.createdBySlackUserId,
+          client: context.client as Parameters<typeof correctRaidPublishedAt>[0]["client"],
+        });
+
+        return mergeRaidMetadata(
+          {
+            ...raid,
+            publishedAt: corrected.raid.publishedAt,
+            slackPostedAt: corrected.raid.slackPostedAt,
+            timingConfidence: corrected.raid.timingConfidence,
+            monthKey: corrected.raid.monthKey,
+          },
+          input,
+        );
+      }
+
+      return mergeRaidMetadata(raid, input);
     }
 
-    if (
-      input.publishedAt &&
-      raid.timingConfidence === "low" &&
-      typeof context.client.chat.update === "function"
-    ) {
-      const corrected = await (context.correctRaidPublishedAt ?? correctRaidPublishedAt)({
-        raidPostId: raid.id,
-        publishedAt: input.publishedAt,
-        correctedBy: input.createdBySlackUserId,
-        client: context.client as Parameters<typeof correctRaidPublishedAt>[0]["client"],
-      });
+    const slackPostedAt = context.now ? context.now() : new Date();
+    const message = buildSlackMessage(input, slackPostedAt);
+    const response = await context.client.chat.postMessage({
+      channel: env.SLACK_RAID_CHANNEL_ID,
+      text: message.text,
+      blocks: message.blocks,
+    });
 
-      return mergeRaidMetadata(
-        {
-          ...raid,
-          publishedAt: corrected.raid.publishedAt,
-          slackPostedAt: corrected.raid.slackPostedAt,
-          timingConfidence: corrected.raid.timingConfidence,
-          monthKey: corrected.raid.monthKey,
-        },
-        input,
-      );
-    }
-
-    return mergeRaidMetadata(raid, input);
-  }
-
-  const slackPostedAt = context.now ? context.now() : new Date();
-  const message = buildSlackMessage(input, slackPostedAt);
-  const response = await context.client.chat.postMessage({
-    channel: env.SLACK_RAID_CHANNEL_ID,
-    text: message.text,
-    blocks: message.blocks,
+    return (context.insertRaidPost ?? insertRaidPost)(
+      buildInsertInput(input, context, slackPostedAt, response),
+    );
   });
-
-  return (context.insertRaidPost ?? insertRaidPost)(
-    buildInsertInput(input, context, slackPostedAt, response),
-  );
 }

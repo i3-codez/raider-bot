@@ -1,6 +1,6 @@
 # Phase 3 Pilot Launch Runbook
 
-Railway cron is the scheduler owner for Phase 3. It should trigger the Node scripts in this repo and nothing else; the app owns the job logic, Railway owns the timing.
+Coolify's Scheduled Tasks are the scheduler owner. They trigger the Node scripts in this repo and nothing else; the app owns the job logic, Coolify owns the timing.
 
 ## Required Env
 
@@ -32,9 +32,9 @@ Confirm the manifest matches the installed app:
 - Bot scopes: `commands`, `chat:write`, `reactions:read`
 - Slash commands: `/raid`, `/leaderboard`, `/mystats`, `/raiderhelp`
 - Events: `reaction_added`, `reaction_removed`
-- Request URLs and event subscriptions should point to the live Railway-hosted Slack endpoint
+- Request URLs and event subscriptions should point to the live Coolify-hosted Slack endpoint
 
-## Railway Cron Commands
+## Scheduled Job Commands
 
 Use one cron job per scheduled surface, and invoke the package scripts directly.
 
@@ -77,8 +77,66 @@ Run this before widening access:
    - month-close writes the expected snapshot for the completed ET month
 7. Check Slack message copy and channel placement before expanding beyond the private pilot.
 
+## Deploying to Coolify
+
+The repo ships with both a `Dockerfile` and a `nixpacks.toml`. Pick one in your Coolify service settings — the Dockerfile build pack is more predictable; Nixpacks is zero-maintenance.
+
+### Service configuration
+
+- **Build pack**: `Dockerfile` (recommended) or `Nixpacks`.
+- **Port**: `3000` (matches the Dockerfile `EXPOSE` and `APP_PORT` default).
+- **Healthcheck path**: `/health` — returns 200 when the app is up AND Supabase is reachable, 503 if the DB probe fails.
+
+### Required env vars (set in Coolify → Environment Variables)
+
+- `DATABASE_URL` — Supabase **Transaction pooler** connection string (port 6543). Keep the `?sslmode=require` suffix; the code also forces `ssl: "require"` on the driver.
+- `SLACK_BOT_TOKEN`
+- `SLACK_SIGNING_SECRET`
+- `SLACK_RAID_CHANNEL_ID`
+- `SLACK_RAID_OPERATOR_USER_IDS`
+- `PUBLISH_WEBHOOK_SHARED_SECRET`
+
+Optional:
+
+- `SLACK_SUMMARY_CHANNEL_ID`, `SLACK_OPS_CHANNEL_ID`
+- `RAIDER_EXCLUDE_SELF_RAIDS`
+- `LOG_LEVEL` (default `info`)
+
+### Migrations
+
+Apply `supabase/migrations/*.sql` against the Supabase project **before** the first container start. Easiest path: paste each migration into the Supabase SQL editor in filename order. The app does not auto-migrate.
+
+### Public URLs
+
+Point your Slack app manifest request URLs at Coolify's generated public URL:
+
+- Slack events / slash commands / interactivity → `/slack/events`
+- Publish webhook → `/publish/webhook` (protected by `x-raider-webhook-secret` header)
+
+### Scheduled Tasks
+
+Coolify → Scheduled Tasks (per service). Add one entry per job; each exits on completion, so no daemon is needed.
+
+| Task | Cron (ET → convert to UTC for Coolify) | Command |
+|------|----------------------------------------|---------|
+| Daily summary | `30 9 * * *` ET | `npm run summary:daily` |
+| Weekly summary | `0 14 * * 1` ET | `npm run summary:weekly` |
+| Monthly summary | `0 14 1 * *` ET | `npm run summary:monthly` |
+| Month close | a few minutes after monthly summary | `npm run month:close` |
+| Ops surfacing | your chosen cadence | `npm run ops:surfacing` |
+
+Coolify's cron scheduler runs in UTC — add or subtract the offset (ET = UTC-5 in standard, UTC-4 in daylight) when you set the expression, or hard-code slightly later UTC times and accept the DST drift.
+
+### First-deploy smoke check
+
+1. Deploy; wait for healthcheck to flip green.
+2. Run `npm run pilot:check` via Coolify's "Run command in running container" (or a one-off Scheduled Task): verifies summary, month-close, and ops-surfacing dry-runs all succeed.
+3. In the Slack workspace, run `/raiderhelp` to confirm slash commands route correctly.
+4. Fire one publish webhook from your upstream (curl with the shared secret header) and verify the raid lands in `SLACK_RAID_CHANNEL_ID`.
+
 ## Operational Notes
 
-- Keep schedule decisions in Railway cron; do not duplicate the same job in another scheduler during the pilot.
+- Keep schedule decisions in Coolify Scheduled Tasks; do not duplicate the same job in another scheduler during the pilot.
 - Use dry-run first when changing env vars, channel IDs, or cron timing.
 - If a job is noisy or misrouted, fix the channel env vars before widening the pilot.
+- On redeploy, Coolify sends SIGTERM — the server drains in-flight handlers and closes the Postgres pool before exiting.

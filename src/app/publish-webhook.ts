@@ -1,3 +1,4 @@
+import { timingSafeEqual } from "node:crypto";
 import type { ServerResponse } from "node:http";
 
 import { z } from "zod";
@@ -9,6 +10,13 @@ import { createRaid, type CreateRaidContext } from "../domain/raids/create-raid.
 export const PUBLISH_WEBHOOK_ENDPOINT = "/publish/webhook";
 export const PUBLISH_WEBHOOK_SECRET_HEADER = "x-raider-webhook-secret";
 export const PUBLISH_WEBHOOK_CREATED_BY = "publish-webhook";
+export const PUBLISH_WEBHOOK_MAX_BODY_BYTES = 64 * 1024;
+
+class PayloadTooLargeError extends Error {
+  constructor() {
+    super("payload_too_large");
+  }
+}
 
 const optionalString = z.preprocess(
   (value) => {
@@ -66,12 +74,35 @@ export interface PublishWebhookResponse {
 
 async function readBody(req: AsyncIterable<Buffer | string>): Promise<string> {
   const chunks: Buffer[] = [];
+  let totalSize = 0;
 
   for await (const chunk of req) {
-    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+    const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+    totalSize += buffer.length;
+
+    if (totalSize > PUBLISH_WEBHOOK_MAX_BODY_BYTES) {
+      throw new PayloadTooLargeError();
+    }
+
+    chunks.push(buffer);
   }
 
   return Buffer.concat(chunks).toString("utf8");
+}
+
+function secretsMatch(provided: string | null, expected: string): boolean {
+  if (provided === null) {
+    return false;
+  }
+
+  const providedBuffer = Buffer.from(provided);
+  const expectedBuffer = Buffer.from(expected);
+
+  if (providedBuffer.length !== expectedBuffer.length) {
+    return false;
+  }
+
+  return timingSafeEqual(providedBuffer, expectedBuffer);
 }
 
 function writeJson(res: ServerResponse, response: PublishWebhookResponse) {
@@ -96,7 +127,7 @@ export async function handlePublishWebhookRequest(
 ): Promise<PublishWebhookResponse> {
   const providedSecret = getHeaderValue(request.headers, PUBLISH_WEBHOOK_SECRET_HEADER);
 
-  if (providedSecret !== env.PUBLISH_WEBHOOK_SHARED_SECRET) {
+  if (!secretsMatch(providedSecret, env.PUBLISH_WEBHOOK_SHARED_SECRET)) {
     return {
       status: 401,
       body: {
@@ -162,9 +193,10 @@ export function createPublishWebhookHandler(dependencies: PublishWebhookDependen
   return (req: PublishWebhookRequest["headers"] & AsyncIterable<Buffer | string>, res: ServerResponse) => {
     void (async () => {
       try {
+        const bodyText = await readBody(req);
         const response = await handlePublishWebhookRequest(
           {
-            bodyText: await readBody(req),
+            bodyText,
             headers: (req as unknown as { headers: PublishWebhookRequest["headers"] }).headers,
           },
           dependencies,
@@ -172,6 +204,17 @@ export function createPublishWebhookHandler(dependencies: PublishWebhookDependen
 
         writeJson(res, response);
       } catch (error) {
+        if (error instanceof PayloadTooLargeError) {
+          writeJson(res, {
+            status: 413,
+            body: {
+              ok: false,
+              error: "payload_too_large",
+            },
+          });
+          return;
+        }
+
         logger.error(
           {
             err: error,

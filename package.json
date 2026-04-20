@@ -24,11 +24,11 @@
     "@slack/web-api": "7.13.0",
     "pino": "10.3.1",
     "postgres": "3.4.9",
+    "tsx": "4.21.0",
     "zod": "4.3.6"
   },
   "devDependencies": {
     "@types/node": "24.5.2",
-    "tsx": "4.21.0",
     "typescript": "6.0.2",
     "vitest": "4.1.4"
   }

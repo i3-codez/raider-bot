@@ -155,10 +155,6 @@ function mapEngagementRow(row: SqlEngagementRow): EngagementLogRecord {
 }
 
 function resolveScoringWindow(minutesFromPublish: number) {
-  if (minutesFromPublish < 0) {
-    throw new Error("Corrected publish time cannot be later than an engagement event.");
-  }
-
   const scoringWindow =
     SCORING_WINDOWS.find((window) => {
       if (window.maxMinutesExclusive === null) {
@@ -179,7 +175,10 @@ export function recalculateEngagementScores(
   publishedAt: Date,
 ): EngagementScoreUpdate[] {
   return engagements.map((engagement) => {
-    const minutesFromPublish = minutesBetween(engagement.reactedAt, publishedAt);
+    // Clamp negatives to 0 to match claim-engagement.ts semantics: a reaction
+    // that predates the corrected publish time is treated as arriving at
+    // publish-time (max points), not as an error.
+    const minutesFromPublish = Math.max(minutesBetween(engagement.reactedAt, publishedAt), 0);
     const scoringWindow = resolveScoringWindow(minutesFromPublish);
 
     return {

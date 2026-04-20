@@ -67,6 +67,7 @@ describe("createRaid", () => {
         now: () => slackPostedAt,
         findRaidByDedupeKey: vi.fn().mockResolvedValue(null),
         insertRaidPost,
+        withDedupeLock: async (_key, cb) => cb(),
       },
     );
 
@@ -145,6 +146,7 @@ describe("createRaid", () => {
         },
         findRaidByDedupeKey: vi.fn().mockResolvedValue(existingRaid),
         correctRaidPublishedAt,
+        withDedupeLock: async (_key, cb) => cb(),
       },
     );
 
