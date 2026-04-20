@@ -14,7 +14,7 @@ features:
       should_escape: false
       url: https://raider-bot.impact3.co/slack/events
     - command: /mystats
-      description: DM your current-month Raider Bot stats.
+      description: Show your current-month Raider Bot stats (visible only to you).
       should_escape: false
       url: https://raider-bot.impact3.co/slack/events
     - command: /raiderhelp
@@ -27,6 +27,7 @@ oauth_config:
       - commands
       - chat:write
       - reactions:read
+      - users:read
 settings:
   event_subscriptions:
     request_url: https://raider-bot.impact3.co/slack/events

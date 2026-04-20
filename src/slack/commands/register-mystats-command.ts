@@ -4,21 +4,7 @@ import {
   getMemberMonthlyStats,
   type GetMemberMonthlyStatsDependencies,
 } from "../../domain/reporting/monthly-reporting.js";
-
-interface ChatPostMessagePayload {
-  channel: string;
-  text: string;
-}
-
-interface ConversationsOpenPayload {
-  users: string;
-}
-
-interface ConversationsOpenResponse {
-  channel?: {
-    id?: string;
-  };
-}
+import { resolveUserNames, type SlackUsersInfoClient } from "../lib/resolve-user-names.js";
 
 export interface HandleMystatsCommandArgs {
   ack(): Promise<void>;
@@ -29,25 +15,23 @@ export interface HandleMystatsCommandArgs {
     response_type: "ephemeral";
     text: string;
   }): Promise<unknown>;
-  client: {
-    conversations: {
-      open(payload: ConversationsOpenPayload): Promise<ConversationsOpenResponse>;
-    };
-    chat: {
-      postMessage(payload: ChatPostMessagePayload): Promise<unknown>;
-    };
-  };
+  client: SlackUsersInfoClient;
 }
 
-export interface HandleMystatsCommandDependencies extends GetMemberMonthlyStatsDependencies {}
+export interface HandleMystatsCommandDependencies extends GetMemberMonthlyStatsDependencies {
+  resolveUserNames?: typeof resolveUserNames;
+}
 
-function buildStatsText(stats: Awaited<ReturnType<typeof getMemberMonthlyStats>>, slackUserId: string) {
+function buildStatsText(
+  stats: Awaited<ReturnType<typeof getMemberMonthlyStats>>,
+  displayName: string,
+): string {
   if (!stats) {
-    return `No tracked activity yet this month for ${slackUserId}.`;
+    return `No tracked activity yet this month for ${displayName}.`;
   }
 
   return [
-    `${stats.displayName} this month:`,
+    `${displayName} this month:`,
     `- Total points: ${stats.totalPoints}`,
     `- Unique raids engaged: ${stats.uniqueRaidsEngaged}`,
     `- Early-window actions: ${stats.earlyWindowActions}`,
@@ -68,23 +52,13 @@ export async function handleMystatsCommand(
     dependencies,
   );
 
-  const dm = await args.client.conversations.open({
-    users: args.command.user_id,
-  });
-  const channelId = dm.channel?.id;
-
-  if (!channelId) {
-    throw new Error("Slack did not return a DM channel id for /mystats.");
-  }
-
-  await args.client.chat.postMessage({
-    channel: channelId,
-    text: buildStatsText(stats, args.command.user_id),
-  });
+  const resolver = dependencies.resolveUserNames ?? resolveUserNames;
+  const names = await resolver(args.client, [args.command.user_id]);
+  const displayName = names.get(args.command.user_id) ?? args.command.user_id;
 
   await args.respond({
     response_type: "ephemeral",
-    text: "Sent your current-month stats by DM.",
+    text: buildStatsText(stats, displayName),
   });
 }
 
@@ -94,7 +68,7 @@ export function registerMystatsCommand(app: App): void {
       ack,
       command,
       respond,
-      client,
+      client: client as unknown as SlackUsersInfoClient,
     });
   });
 }

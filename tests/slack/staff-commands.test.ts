@@ -57,17 +57,27 @@ describe("staff command handlers", () => {
     vi.doUnmock("../../src/slack/commands/register-raiderhelp-command.js");
   });
 
-  it("/leaderboard responds in-channel with shared rankings", async () => {
+  function makeClient() {
+    return {
+      users: {
+        info: vi.fn(),
+      },
+    };
+  }
+
+  it("/leaderboard responds in-channel with resolved display names (no mentions)", async () => {
     const { handleLeaderboardCommand } = await import(
       "../../src/slack/commands/register-leaderboard-command.js"
     );
     const ack = vi.fn().mockResolvedValue(undefined);
     const respond = vi.fn().mockResolvedValue(undefined);
+    const client = makeClient();
 
     await handleLeaderboardCommand(
       {
         ack,
         respond,
+        client,
       },
       {
         queryMonthlyLeaderboard: vi.fn().mockResolvedValue([
@@ -80,28 +90,24 @@ describe("staff command handlers", () => {
             totalActions: 4,
           },
         ]),
+        resolveUserNames: vi.fn().mockResolvedValue(new Map([["U_1", "Alex Raider"]])),
       },
     );
 
     expect(ack).toHaveBeenCalledOnce();
-    expect(respond).toHaveBeenCalledWith({
-      response_type: "in_channel",
-      text: expect.stringContaining("Alex Raider"),
-    });
+    const payload = respond.mock.calls[0]![0] as { response_type: string; text: string };
+    expect(payload.response_type).toBe("in_channel");
+    expect(payload.text).toContain("1. Alex Raider - 24 pts");
+    expect(payload.text).not.toContain("<@");
   });
 
-  it("/mystats opens a DM and keeps the response private", async () => {
+  it("/mystats responds ephemerally with the caller's resolved name", async () => {
     const { handleMystatsCommand } = await import(
       "../../src/slack/commands/register-mystats-command.js"
     );
     const ack = vi.fn().mockResolvedValue(undefined);
     const respond = vi.fn().mockResolvedValue(undefined);
-    const open = vi.fn().mockResolvedValue({
-      channel: {
-        id: "D_STATS",
-      },
-    });
-    const postMessage = vi.fn().mockResolvedValue(undefined);
+    const client = makeClient();
 
     await handleMystatsCommand(
       {
@@ -110,14 +116,7 @@ describe("staff command handlers", () => {
           user_id: "U_1",
         },
         respond,
-        client: {
-          conversations: {
-            open,
-          },
-          chat: {
-            postMessage,
-          },
-        },
+        client,
       },
       {
         queryMemberMonthlyStats: vi.fn().mockResolvedValue({
@@ -128,19 +127,43 @@ describe("staff command handlers", () => {
           earlyWindowActions: 2,
           totalActions: 4,
         }),
+        resolveUserNames: vi.fn().mockResolvedValue(new Map([["U_1", "Alex Raider"]])),
       },
     );
 
-    expect(open).toHaveBeenCalledWith({
-      users: "U_1",
-    });
-    expect(postMessage).toHaveBeenCalledWith({
-      channel: "D_STATS",
-      text: expect.stringContaining("Alex Raider this month"),
-    });
+    expect(ack).toHaveBeenCalledOnce();
+    const payload = respond.mock.calls[0]![0] as { response_type: string; text: string };
+    expect(payload.response_type).toBe("ephemeral");
+    expect(payload.text).toContain("Alex Raider this month");
+    expect(payload.text).not.toContain("<@");
+  });
+
+  it("/mystats responds ephemerally when the caller has no tracked activity", async () => {
+    const { handleMystatsCommand } = await import(
+      "../../src/slack/commands/register-mystats-command.js"
+    );
+    const ack = vi.fn().mockResolvedValue(undefined);
+    const respond = vi.fn().mockResolvedValue(undefined);
+    const client = makeClient();
+
+    await handleMystatsCommand(
+      {
+        ack,
+        command: {
+          user_id: "U_2",
+        },
+        respond,
+        client,
+      },
+      {
+        queryMemberMonthlyStats: vi.fn().mockResolvedValue(null),
+        resolveUserNames: vi.fn().mockResolvedValue(new Map([["U_2", "Jordan Ops"]])),
+      },
+    );
+
     expect(respond).toHaveBeenCalledWith({
       response_type: "ephemeral",
-      text: "Sent your current-month stats by DM.",
+      text: expect.stringContaining("No tracked activity yet this month for Jordan Ops"),
     });
   });
 
