@@ -1,0 +1,63 @@
+#!/usr/bin/env node
+
+import { pathToFileURL } from "node:url";
+
+import { env } from "../config/env.js";
+import { closeSql } from "../db/sql.js";
+import { createRaid } from "../domain/raids/create-raid.js";
+import { runXMonitor } from "../domain/x-monitor/run-x-monitor.js";
+import { createApifyClient } from "../x-monitor/apify-client.js";
+import { createSlackClient } from "../slack/client.js";
+
+export interface RunXMonitorCommandDependencies {
+  runXMonitor?: typeof runXMonitor;
+  stdout?: Pick<typeof console, "log">;
+}
+
+function parseDryRun(argv: string[]): boolean {
+  return argv.includes("--dry-run");
+}
+
+export async function runXMonitorCommand(
+  argv: string[],
+  dependencies: RunXMonitorCommandDependencies = {},
+): Promise<number> {
+  const dryRun = parseDryRun(argv);
+  const run = dependencies.runXMonitor ?? runXMonitor;
+  const stdout = dependencies.stdout ?? console;
+
+  const result = await run(
+    { dryRun },
+    {
+      apify: createApifyClient({
+        token: env.APIFY_TOKEN,
+        actorId: env.APIFY_X_MONITOR_ACTOR_ID,
+      }),
+      createRaid,
+      slackClient: createSlackClient() as Parameters<typeof runXMonitor>[1]["slackClient"],
+    },
+  );
+
+  stdout.log(
+    `x-monitor${dryRun ? " (dry-run)" : ""}: fetched=${result.tweetsFetched} processed=${result.raidsProcessed} failures=${result.failures} skipped.nonOriginal=${result.skipped.nonOriginal} skipped.unmapped=${result.skipped.unmapped} skipped.malformed=${result.skipped.malformed}`,
+  );
+
+  return result.failures === 0 ? 0 : 1;
+}
+
+async function main() {
+  const code = await runXMonitorCommand(process.argv.slice(2));
+  process.exitCode = code;
+}
+
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  try {
+    await main();
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown x-monitor failure.";
+    console.error(`x-monitor failed: ${message}`);
+    process.exitCode = 1;
+  } finally {
+    await closeSql({ timeout: 0 });
+  }
+}
