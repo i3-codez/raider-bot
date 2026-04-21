@@ -40,17 +40,20 @@ export function parseTweetRecord(raw: unknown): TweetRecord | null {
   }
   const source = raw as Record<string, unknown>;
 
-  const tweetId = pickString(source, ["id", "id_str", "tweetId"]);
-  const tweetUrl = pickString(source, ["url", "tweetUrl"]);
+  const tweetId = pickString(source, ["id", "id_str", "tweetId", "tweet_id"]);
   const createdAtRaw = pickString(source, ["created_at", "createdAt"]);
   const authorHandle = pickNested(
     source,
-    [["user", "screen_name"], ["author", "userName"], ["screen_name"]],
+    [["user", "screen_name"], ["author", "userName"], ["user_info", "screen_name"], ["screen_name"]],
     isNonEmptyString,
   );
   const authorName =
-    pickNested(source, [["user", "name"], ["author", "name"]], isNonEmptyString) ??
+    pickNested(source, [["user", "name"], ["author", "name"], ["user_info", "name"]], isNonEmptyString) ??
     pickString(source, ["name"]);
+
+  const tweetUrl =
+    pickString(source, ["url", "tweetUrl"]) ??
+    (tweetId && authorHandle ? `https://x.com/${authorHandle.toLowerCase()}/status/${tweetId}` : null);
 
   if (!tweetId || !tweetUrl || !createdAtRaw || !authorHandle || !authorName) {
     return null;

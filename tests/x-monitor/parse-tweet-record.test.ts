@@ -67,4 +67,25 @@ describe("parseTweetRecord", () => {
 
     expect(parsed).toBeNull();
   });
+
+  it("parses Apify actor format (tweet_id, user_info, no url)", () => {
+    const apifyItem = {
+      type: "tweet",
+      tweet_id: "2046599632843591907",
+      screen_name: "Enlivex",
+      created_at: "Tue Apr 21 14:39:11 +0000 2026",
+      text: "Another key milestone",
+      user_info: { screen_name: "Enlivex", name: "Enlivex" },
+    };
+
+    const parsed = parseTweetRecord(apifyItem);
+
+    expect(parsed).not.toBeNull();
+    expect(parsed!.tweetId).toBe("2046599632843591907");
+    expect(parsed!.tweetUrl).toBe("https://x.com/enlivex/status/2046599632843591907");
+    expect(parsed!.authorHandle).toBe("enlivex");
+    expect(parsed!.authorName).toBe("Enlivex");
+    expect(parsed!.isRetweet).toBe(false);
+    expect(parsed!.isReply).toBe(false);
+  });
 });
