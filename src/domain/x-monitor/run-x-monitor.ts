@@ -13,7 +13,7 @@ import type {
 } from "../raids/create-raid.js";
 import type { RaidPost } from "../raids/types.js";
 
-const SINCE_WINDOW_MINUTES = 5;
+const DEFAULT_SINCE_WINDOW_MINUTES = 5;
 const MAX_POSTS = 50;
 const MONITOR_CREATED_BY = "x-monitor";
 
@@ -27,13 +27,14 @@ export interface MonitorContext {
 }
 
 export async function runXMonitor(
-  params: { dryRun?: boolean },
+  params: { dryRun?: boolean; sinceMinutes?: number },
   context: MonitorContext,
 ): Promise<MonitorResult> {
   const clients = context.config ?? X_CLIENTS;
   const logger = context.logger ?? defaultLogger;
   const now = context.now ? context.now() : new Date();
-  const since = new Date(now.getTime() - SINCE_WINDOW_MINUTES * 60 * 1000);
+  const windowMinutes = params.sinceMinutes ?? DEFAULT_SINCE_WINDOW_MINUTES;
+  const since = new Date(now.getTime() - windowMinutes * 60 * 1000);
 
   const query = buildApifyQuery(
     clients.map((client) => client.handle),

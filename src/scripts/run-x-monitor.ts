@@ -18,16 +18,24 @@ function parseDryRun(argv: string[]): boolean {
   return argv.includes("--dry-run");
 }
 
+function parseSinceMinutes(argv: string[]): number | undefined {
+  const arg = argv.find((a) => a.startsWith("--since-minutes="));
+  if (!arg) return undefined;
+  const value = parseInt(arg.split("=")[1], 10);
+  return Number.isFinite(value) && value > 0 ? value : undefined;
+}
+
 export async function runXMonitorCommand(
   argv: string[],
   dependencies: RunXMonitorCommandDependencies = {},
 ): Promise<number> {
   const dryRun = parseDryRun(argv);
+  const sinceMinutes = parseSinceMinutes(argv);
   const run = dependencies.runXMonitor ?? runXMonitor;
   const stdout = dependencies.stdout ?? console;
 
   const result = await run(
-    { dryRun },
+    { dryRun, sinceMinutes },
     {
       apify: createApifyClient({
         token: env.APIFY_TOKEN,
