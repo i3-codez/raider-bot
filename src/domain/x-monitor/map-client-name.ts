@@ -5,6 +5,6 @@ export function mapHandleToClientName(
   clients: readonly XClient[],
 ): string | undefined {
   const normalized = authorHandle.toLowerCase();
-  const match = clients.find((client) => client.handle === normalized);
+  const match = clients.find((client) => client.handle.toLowerCase() === normalized);
   return match?.clientName;
 }
