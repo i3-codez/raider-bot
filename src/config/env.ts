@@ -47,6 +47,7 @@ export const envSchema = z.object({
   SLACK_RAID_CHANNEL_ID: z.string().trim().min(1),
   SLACK_SUMMARY_CHANNEL_ID: optionalString,
   SLACK_OPS_CHANNEL_ID: optionalString,
+  SLACK_LEADERBOARD_CANVAS_ID: optionalString,
   SLACK_RAID_OPERATOR_USER_IDS: operatorUserIdsSchema,
   APIFY_TOKEN: z.string().trim().min(1),
   APIFY_X_MONITOR_ACTOR_ID: z.string().trim().min(1).default("danek~twitter-scraper-ppr"),

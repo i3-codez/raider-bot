@@ -4,6 +4,12 @@ import {
   getMonthlyLeaderboard,
   type GetMonthlyLeaderboardDependencies,
 } from "../../domain/reporting/monthly-reporting.js";
+import {
+  publishCanvasLeaderboard,
+  type PublishCanvasLeaderboardDependencies,
+} from "../../jobs/publish-canvas-leaderboard.js";
+import { logger } from "../../lib/logger.js";
+import type { SlackCanvasClient } from "../client.js";
 import { resolveUserNames, type SlackUsersInfoClient } from "../lib/resolve-user-names.js";
 
 interface RespondPayload {
@@ -14,12 +20,14 @@ interface RespondPayload {
 export interface HandleLeaderboardCommandArgs {
   ack(): Promise<void>;
   respond(payload: RespondPayload): Promise<unknown>;
-  client: SlackUsersInfoClient;
+  client: SlackUsersInfoClient & SlackCanvasClient;
 }
 
 export interface HandleLeaderboardCommandDependencies
-  extends GetMonthlyLeaderboardDependencies {
+  extends GetMonthlyLeaderboardDependencies,
+    Pick<PublishCanvasLeaderboardDependencies, "queryMonthlyLeaderboard" | "resolveCanvasId"> {
   resolveUserNames?: typeof resolveUserNames;
+  publishCanvasLeaderboard?: typeof publishCanvasLeaderboard;
 }
 
 function buildLeaderboardText(
@@ -55,6 +63,22 @@ export async function handleLeaderboardCommand(
     response_type: "in_channel",
     text: buildLeaderboardText(leaderboard, names),
   });
+
+  const runCanvas = dependencies.publishCanvasLeaderboard ?? publishCanvasLeaderboard;
+  runCanvas(
+    {},
+    {
+      client: args.client,
+      queryMonthlyLeaderboard: dependencies.queryMonthlyLeaderboard,
+      resolveCanvasId: dependencies.resolveCanvasId,
+      resolveUserNames: dependencies.resolveUserNames,
+    },
+  ).catch((error) => {
+    logger.warn(
+      { err: error },
+      "Canvas leaderboard refresh from /leaderboard command failed.",
+    );
+  });
 }
 
 export function registerLeaderboardCommand(app: App): void {
@@ -62,7 +86,7 @@ export function registerLeaderboardCommand(app: App): void {
     await handleLeaderboardCommand({
       ack,
       respond,
-      client: client as unknown as SlackUsersInfoClient,
+      client: client as unknown as SlackUsersInfoClient & SlackCanvasClient,
     });
   });
 }

@@ -29,6 +29,8 @@ oauth_config:
       - reactions:read
       - reactions:write
       - users:read
+      - canvases:read
+      - canvases:write
 settings:
   event_subscriptions:
     request_url: https://raider-bot.impact3.co/slack/events

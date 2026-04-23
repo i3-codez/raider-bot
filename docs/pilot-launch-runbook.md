@@ -17,6 +17,7 @@ Optional, but recommended for launch routing:
 
 - `SLACK_SUMMARY_CHANNEL_ID`
 - `SLACK_OPS_CHANNEL_ID`
+- `SLACK_LEADERBOARD_CANVAS_ID` — required if you run `canvas:leaderboard`; create a channel canvas in the raid channel and paste its canvas ID here.
 - `SLACK_APP_TOKEN` for Socket Mode or local-only workflows, if needed
 
 Defaults and fallbacks:
@@ -29,7 +30,7 @@ Defaults and fallbacks:
 
 Confirm the manifest matches the installed app:
 
-- Bot scopes: `commands`, `chat:write`, `reactions:read`
+- Bot scopes: `commands`, `chat:write`, `reactions:read`, `reactions:write`, `users:read`, `canvases:read`, `canvases:write`
 - Slash commands: `/raid`, `/leaderboard`, `/mystats`, `/raiderhelp`
 - Events: `reaction_added`, `reaction_removed`
 - Request URLs and event subscriptions should point to the live Coolify-hosted Slack endpoint
@@ -44,6 +45,7 @@ npm run summary:weekly
 npm run summary:monthly
 npm run month:close
 npm run ops:surfacing
+npm run canvas:leaderboard
 ```
 
 Dry-run examples for pilot validation:
@@ -54,6 +56,7 @@ npm run summary:weekly -- --dry-run
 npm run summary:monthly -- --dry-run
 npm run month:close -- --month=2026-03 --dry-run
 npm run ops:surfacing -- --dry-run
+npm run canvas:leaderboard -- --dry-run
 ```
 
 Pilot-check command:
@@ -126,6 +129,7 @@ Coolify → Scheduled Tasks (per service). Add one entry per job; each exits on 
 | Monthly summary | `0 14 1 * *` ET | `npm run summary:monthly` |
 | Month close | a few minutes after monthly summary | `npm run month:close` |
 | Ops surfacing | your chosen cadence | `npm run ops:surfacing` |
+| Canvas leaderboard | `0 * * * *` (hourly) | `npm run canvas:leaderboard` |
 | X tweet monitor | `*/2 * * * *` | `npm run monitor:x` |
 
 Coolify's cron scheduler runs in UTC — add or subtract the offset (ET = UTC-5 in standard, UTC-4 in daylight) when you set the expression, or hard-code slightly later UTC times and accept the DST drift.
