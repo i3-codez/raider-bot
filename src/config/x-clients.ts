@@ -12,6 +12,5 @@ export const X_CLIENTS = [
   { handle: "skyecoinsights", clientName: "Sky Eco Insights" },
   { handle: "skymoney", clientName: "Sky Money" },
   { handle: "enlivex", clientName: "Enlivex" },
-  { handle: "jupiterexchange", clientName: "Jupiter" },
   { handle: "kylereidhead", clientName: "Kyle Reidhead" },
 ] as const satisfies readonly XClient[];
