@@ -6,7 +6,7 @@ import { env } from "../config/env.js";
 import { closeSql } from "../db/sql.js";
 import { createRaid } from "../domain/raids/create-raid.js";
 import { runXMonitor } from "../domain/x-monitor/run-x-monitor.js";
-import { createApifyClient } from "../x-monitor/apify-client.js";
+import { createApifyClient } from "../lib/apify-client.js";
 import { createSlackClient } from "../slack/client.js";
 
 export interface RunXMonitorCommandDependencies {
@@ -37,10 +37,8 @@ export async function runXMonitorCommand(
   const result = await run(
     { dryRun, sinceMinutes },
     {
-      apify: createApifyClient({
-        token: env.APIFY_TOKEN,
-        actorId: env.APIFY_X_MONITOR_ACTOR_ID,
-      }),
+      apify: createApifyClient({ token: env.APIFY_TOKEN }),
+      apifyActorId: env.APIFY_X_MONITOR_ACTOR_ID,
       createRaid,
       slackClient: createSlackClient() as Parameters<typeof runXMonitor>[1]["slackClient"],
     },
