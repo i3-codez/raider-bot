@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-**Raider Bot** is a Slack app for Impact3 that turns newly published client social posts (currently X) into time-sensitive "raid" prompts. When a post is published, the bot drops it into a Slack channel; staff claim engagement actions via emoji reactions and earn points based on speed. Core value: a newly published client post reaches the right staff in Slack fast enough that meaningful engagement happens inside the first 30 minutes.
+**Raider Bot** is a Slack app for Impact3 that turns newly published client social posts (X and LinkedIn) into time-sensitive "raid" prompts. When a post is published, the bot drops it into a Slack channel; staff claim engagement actions via emoji reactions and earn points based on speed. Core value: a newly published client post reaches the right staff in Slack fast enough that meaningful engagement happens inside the first 30 minutes.
 
 ## Commands
 
@@ -60,7 +60,7 @@ Node 24 · TypeScript 6 · `@slack/bolt` 4.7 (HTTP receiver) · Supabase Postgre
 - Scoring windows are fixed integer buckets (`10/8/6/3/0`). **No fractional timing multipliers** — they are harder to explain, audit, and test.
 - Reactions are accepted as good-faith claims; there is no external platform API verification in the MVP. Do not add one without an explicit scope change.
 - Monthly scores reset but history persists — month-close snapshots are durable and must not be mutated by later jobs.
-- Launch scope is X only; keep LinkedIn parity out until the core loop is validated.
+- Launch scope covers X and LinkedIn. LinkedIn was added 2026-04-29 after the X pilot validated; both platforms use the same scoring windows, the same Slack channel, and the same scoring invariants.
 
 ## Tests
 
