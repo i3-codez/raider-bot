@@ -278,4 +278,50 @@ describe("handlePublishWebhookRequest", () => {
       },
     });
   });
+
+  it("routes valid linkedin payloads through createRaid", async () => {
+    const { handlePublishWebhookRequest, PUBLISH_WEBHOOK_SECRET_HEADER } = await import(
+      "../../src/app/publish-webhook.js"
+    );
+    const createRaid = vi.fn().mockResolvedValue({
+      id: "raid-li-1",
+      timingConfidence: "high",
+    });
+
+    const response = await handlePublishWebhookRequest(
+      {
+        headers: {
+          [PUBLISH_WEBHOOK_SECRET_HEADER]: "publish-secret",
+        },
+        bodyText: JSON.stringify({
+          post_url: "https://www.linkedin.com/posts/williamhgates_some-post-7329207003942125568",
+          client_name: "Bill Gates",
+          platform: "linkedin",
+          published_at: "2026-04-29T12:00:00.000Z",
+          source_event_id: "7329207003942125568",
+          owner_external_id: "williamhgates",
+        }),
+      },
+      {
+        createRaid,
+        context: {
+          client: {
+            chat: {
+              postMessage: vi.fn(),
+            },
+          },
+        },
+      },
+    );
+
+    expect(createRaid).toHaveBeenCalledWith(
+      expect.objectContaining({
+        platform: "linkedin",
+        sourceEventId: "7329207003942125568",
+        ownerExternalId: "williamhgates",
+      }),
+      expect.any(Object),
+    );
+    expect(response.status).toBe(200);
+  });
 });
