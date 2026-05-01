@@ -147,6 +147,13 @@ export function buildRaidModal(): RaidModalView {
               },
               value: "x",
             },
+            {
+              text: {
+                type: "plain_text",
+                text: "LinkedIn",
+              },
+              value: "linkedin",
+            },
           ],
           initial_option: {
             text: {
