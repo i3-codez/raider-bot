@@ -74,4 +74,32 @@ describe("parsePostRecord", () => {
 
     expect(parsed!.authorSlug).toBe("williamhgates");
   });
+
+  it("falls back to author.universalName when publicIdentifier is null (company posts)", () => {
+    const companyItem = {
+      type: "post",
+      id: "7455977127562280960",
+      linkedinUrl:
+        "https://www.linkedin.com/posts/enlivex_32-million-americans-are-currently-living-activity-7455977127562280960-lun_",
+      author: {
+        id: "19117645",
+        universalName: "enlivex",
+        publicIdentifier: null,
+        type: "company",
+        name: "Enlivex",
+        linkedinUrl: "https://www.linkedin.com/company/enlivex/posts",
+      },
+      postedAt: {
+        timestamp: 1777643472567,
+        date: "2026-05-01T13:51:12.567Z",
+      },
+    };
+
+    const parsed = parsePostRecord(companyItem);
+
+    expect(parsed).not.toBeNull();
+    expect(parsed!.authorSlug).toBe("enlivex");
+    expect(parsed!.authorDisplayName).toBe("Enlivex");
+    expect(parsed!.authorUrl).toBe("https://www.linkedin.com/company/enlivex/posts");
+  });
 });

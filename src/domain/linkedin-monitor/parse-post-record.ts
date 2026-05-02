@@ -46,7 +46,9 @@ export function parsePostRecord(raw: unknown): LinkedinPostRecord | null {
   if (!isObject(author)) return null;
   if (!isObject(postedAt)) return null;
 
-  const authorSlug = author.publicIdentifier;
+  const authorSlug = isNonEmptyString(author.publicIdentifier)
+    ? author.publicIdentifier
+    : author.universalName;
   const authorName = author.name;
   const authorUrl = author.linkedinUrl;
 
