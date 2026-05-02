@@ -55,7 +55,7 @@ export const envSchema = z.object({
     .string()
     .trim()
     .min(1)
-    .default("harvestapi/linkedin-profile-posts"),
+    .default("harvestapi~linkedin-profile-posts"),
   PUBLISH_WEBHOOK_SHARED_SECRET: z.string().trim().min(1),
   RAIDER_EXCLUDE_SELF_RAIDS: booleanFlagSchema,
   SLACK_APP_TOKEN: optionalString,
