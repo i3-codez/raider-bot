@@ -1,16 +1,9 @@
-export interface ApifyRunInput {
-  max_posts: number;
-  query: string;
-  search_type: "Latest" | "Top";
-}
-
 export interface ApifyClient {
-  runSyncGetDatasetItems(input: ApifyRunInput): Promise<unknown[]>;
+  runActor<TInput>(actorId: string, input: TInput): Promise<unknown[]>;
 }
 
 export interface CreateApifyClientOptions {
   token: string;
-  actorId: string;
   fetchImpl?: typeof fetch;
 }
 
@@ -20,8 +13,8 @@ export function createApifyClient(options: CreateApifyClientOptions): ApifyClien
   const fetchImpl = options.fetchImpl ?? fetch;
 
   return {
-    async runSyncGetDatasetItems(input) {
-      const url = `${APIFY_BASE}/acts/${options.actorId}/run-sync-get-dataset-items`;
+    async runActor(actorId, input) {
+      const url = `${APIFY_BASE}/acts/${actorId}/run-sync-get-dataset-items`;
       const response = await fetchImpl(url, {
         method: "POST",
         headers: {

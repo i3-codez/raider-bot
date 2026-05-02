@@ -93,7 +93,10 @@ describe("buildRaidModal", () => {
         label: { text: "Platform" },
         element: {
           type: "static_select",
-          options: [{ text: { text: "X" }, value: "x" }],
+          options: [
+            { text: { text: "X" }, value: "x" },
+            { text: { text: "LinkedIn" }, value: "linkedin" },
+          ],
         },
       },
       {
@@ -203,6 +206,82 @@ describe("parseManualRaidInput", () => {
       ok: false,
       errors: {
         [RAID_MODAL_FIELD_IDS.publishedAt.blockId]: "Published time can't be in the future.",
+      },
+    });
+  });
+
+  it("accepts the four supported LinkedIn URL forms when platform=linkedin", () => {
+    const now = new Date("2026-04-29T16:00:00.000Z");
+
+    for (const postUrl of [
+      "https://www.linkedin.com/in/williamhgates/recent-activity/all",
+      "https://linkedin.com/company/microsoft/posts",
+      "https://www.linkedin.com/posts/williamhgates_some-shareable-text-7329207003942125568",
+      "https://www.linkedin.com/feed/update/urn:li:activity:7329207003942125568",
+    ]) {
+      const result = parseManualRaidInput(
+        buildViewState({ postUrl, platformValue: "linkedin" }),
+        { now },
+      );
+
+      expect(result).toEqual({
+        ok: true,
+        data: {
+          postUrl,
+          clientName: "Impact3",
+          platform: "linkedin",
+          publishedAt: null,
+        },
+      });
+    }
+  });
+
+  it("rejects non-LinkedIn URLs when platform=linkedin", () => {
+    const now = new Date("2026-04-29T16:00:00.000Z");
+
+    expect(
+      parseManualRaidInput(
+        buildViewState({
+          postUrl: "https://x.com/impact3/status/1234567890",
+          platformValue: "linkedin",
+        }),
+        { now },
+      ),
+    ).toEqual({
+      ok: false,
+      errors: {
+        [RAID_MODAL_FIELD_IDS.postUrl.blockId]: "Use a valid LinkedIn post URL.",
+      },
+    });
+
+    expect(
+      parseManualRaidInput(
+        buildViewState({
+          postUrl: "https://www.linkedin.com/jobs/view/123",
+          platformValue: "linkedin",
+        }),
+        { now },
+      ),
+    ).toEqual({
+      ok: false,
+      errors: {
+        [RAID_MODAL_FIELD_IDS.postUrl.blockId]: "Use a valid LinkedIn post URL.",
+      },
+    });
+  });
+
+  it("rejects an unknown platform value", () => {
+    const now = new Date("2026-04-29T16:00:00.000Z");
+
+    const result = parseManualRaidInput(
+      buildViewState({ platformValue: "facebook" }),
+      { now },
+    );
+
+    expect(result).toEqual({
+      ok: false,
+      errors: {
+        [RAID_MODAL_FIELD_IDS.platform.blockId]: "Platform must be X or LinkedIn.",
       },
     });
   });

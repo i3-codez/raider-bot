@@ -46,6 +46,8 @@ npm run summary:monthly
 npm run month:close
 npm run ops:surfacing
 npm run canvas:leaderboard
+npm run monitor:x
+npm run monitor:linkedin
 ```
 
 Dry-run examples for pilot validation:
@@ -106,6 +108,7 @@ Optional:
 - `RAIDER_EXCLUDE_SELF_RAIDS`
 - `LOG_LEVEL` (default `info`)
 - `APIFY_X_MONITOR_ACTOR_ID` — Apify actor slug (defaults to `danek~twitter-scraper-ppr`).
+- `APIFY_LINKEDIN_MONITOR_ACTOR_ID` — Apify actor slug (defaults to `harvestapi/linkedin-profile-posts`).
 
 ### Migrations
 
@@ -131,6 +134,7 @@ Coolify → Scheduled Tasks (per service). Add one entry per job; each exits on 
 | Ops surfacing | your chosen cadence | `npm run ops:surfacing` |
 | Canvas leaderboard | `0 * * * *` (hourly) | `npm run canvas:leaderboard` |
 | X tweet monitor | `*/2 * * * *` | `npm run monitor:x` |
+| LinkedIn post monitor | `*/5 * * * *` | `npm run monitor:linkedin` |
 
 Coolify's cron scheduler runs in UTC — add or subtract the offset (ET = UTC-5 in standard, UTC-4 in daylight) when you set the expression, or hard-code slightly later UTC times and accept the DST drift.
 
@@ -147,3 +151,4 @@ Coolify's cron scheduler runs in UTC — add or subtract the offset (ET = UTC-5 
 - Use dry-run first when changing env vars, channel IDs, or cron timing.
 - If a job is noisy or misrouted, fix the channel env vars before widening the pilot.
 - On redeploy, Coolify sends SIGTERM — the server drains in-flight handlers and closes the Postgres pool before exiting.
+- LinkedIn raids land in the same `SLACK_RAID_CHANNEL_ID` as X. To populate the LinkedIn account list, edit `src/config/linkedin-clients.ts` and redeploy. Apify cost is expected to stay under $5/month at current volumes.

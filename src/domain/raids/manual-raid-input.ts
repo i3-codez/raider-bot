@@ -4,6 +4,9 @@ import { RAID_MODAL_FIELD_IDS } from "../../slack/commands/build-raid-modal.js";
 const X_POST_URL_PATTERN =
   /^https:\/\/(?:x|twitter)\.com\/[^/?#]+\/status\/[A-Za-z0-9_]+(?:[/?#].*)?$/i;
 
+const LINKEDIN_POST_URL_PATTERN =
+  /^https:\/\/(?:www\.)?linkedin\.com\/(?:in\/[^/?#]+|company\/[^/?#]+|posts\/[^/?#]+|feed\/update\/urn:li:activity:[A-Za-z0-9_]+)(?:[/?#].*)?$/i;
+
 type ManualRaidViewValues = Record<string, Record<string, unknown>>;
 
 export interface ManualRaidInput {
@@ -82,16 +85,18 @@ export function parseManualRaidInput(
   const selectedPlatform = trimString(platformValue?.selected_option?.value);
   const publishedAt = parsePublishedAt(publishedAtValue?.selected_date_time);
 
-  if (!X_POST_URL_PATTERN.test(postUrl)) {
+  const platformIsValid = selectedPlatform === "x" || selectedPlatform === "linkedin";
+
+  if (!platformIsValid) {
+    errors[RAID_MODAL_FIELD_IDS.platform.blockId] = "Platform must be X or LinkedIn.";
+  } else if (selectedPlatform === "x" && !X_POST_URL_PATTERN.test(postUrl)) {
     errors[RAID_MODAL_FIELD_IDS.postUrl.blockId] = "Use a valid X post URL.";
+  } else if (selectedPlatform === "linkedin" && !LINKEDIN_POST_URL_PATTERN.test(postUrl)) {
+    errors[RAID_MODAL_FIELD_IDS.postUrl.blockId] = "Use a valid LinkedIn post URL.";
   }
 
   if (clientName.length < 2 || clientName.length > 60) {
     errors[RAID_MODAL_FIELD_IDS.clientName.blockId] = "Client name must be 2-60 characters.";
-  }
-
-  if (selectedPlatform !== "x") {
-    errors[RAID_MODAL_FIELD_IDS.platform.blockId] = "Platform must be X.";
   }
 
   if (publishedAt !== null && publishedAt.getTime() > now.getTime()) {
@@ -110,7 +115,7 @@ export function parseManualRaidInput(
     data: {
       postUrl,
       clientName,
-      platform: "x",
+      platform: selectedPlatform as Platform,
       publishedAt,
     },
   };

@@ -31,12 +31,13 @@ describe("runXMonitor", () => {
   it("processes an empty dataset cleanly", async () => {
     const { runXMonitor } = await import("../../src/domain/x-monitor/run-x-monitor.js");
     const createRaid = vi.fn();
-    const apify = { runSyncGetDatasetItems: vi.fn().mockResolvedValue([]) };
+    const apify = { runActor: vi.fn().mockResolvedValue([]) };
 
     const result = await runXMonitor(
       { dryRun: false },
       {
         apify,
+        apifyActorId: "danek~twitter-scraper-ppr",
         createRaid,
         slackClient: {} as never,
         now: () => now,
@@ -53,7 +54,7 @@ describe("runXMonitor", () => {
     const { runXMonitor } = await import("../../src/domain/x-monitor/run-x-monitor.js");
     const createRaid = vi.fn().mockImplementation(async (input) => ({ id: "raid-" + input.sourceEventId }));
     const apify = {
-      runSyncGetDatasetItems: vi.fn().mockResolvedValue([
+      runActor: vi.fn().mockResolvedValue([
         validTweet,
         { ...validTweet, id: "tweet-2", is_retweet: true },
         { ...validTweet, id: "tweet-3", in_reply_to_status_id: "111" },
@@ -65,6 +66,7 @@ describe("runXMonitor", () => {
       { dryRun: false },
       {
         apify,
+        apifyActorId: "danek~twitter-scraper-ppr",
         createRaid,
         slackClient: {} as never,
         now: () => now,
@@ -94,12 +96,18 @@ describe("runXMonitor", () => {
     const { runXMonitor } = await import("../../src/domain/x-monitor/run-x-monitor.js");
     const createRaid = vi.fn();
     const apify = {
-      runSyncGetDatasetItems: vi.fn().mockResolvedValue([{ nothing: "useful" }]),
+      runActor: vi.fn().mockResolvedValue([{ nothing: "useful" }]),
     };
 
     const result = await runXMonitor(
       { dryRun: false },
-      { apify, createRaid, slackClient: {} as never, now: () => now },
+      {
+        apify,
+        apifyActorId: "danek~twitter-scraper-ppr",
+        createRaid,
+        slackClient: {} as never,
+        now: () => now,
+      },
     );
 
     expect(result.skipped.malformed).toBe(1);
@@ -115,7 +123,7 @@ describe("runXMonitor", () => {
       })
       .mockImplementationOnce(async (input) => ({ id: "raid-" + input.sourceEventId }));
     const apify = {
-      runSyncGetDatasetItems: vi.fn().mockResolvedValue([
+      runActor: vi.fn().mockResolvedValue([
         validTweet,
         { ...validTweet, id: "tweet-5" },
       ]),
@@ -123,7 +131,13 @@ describe("runXMonitor", () => {
 
     const result = await runXMonitor(
       { dryRun: false },
-      { apify, createRaid, slackClient: {} as never, now: () => now },
+      {
+        apify,
+        apifyActorId: "danek~twitter-scraper-ppr",
+        createRaid,
+        slackClient: {} as never,
+        now: () => now,
+      },
     );
 
     expect(result.failures).toBe(1);
@@ -135,12 +149,18 @@ describe("runXMonitor", () => {
     const { runXMonitor } = await import("../../src/domain/x-monitor/run-x-monitor.js");
     const createRaid = vi.fn();
     const apify = {
-      runSyncGetDatasetItems: vi.fn().mockResolvedValue([validTweet]),
+      runActor: vi.fn().mockResolvedValue([validTweet]),
     };
 
     const result = await runXMonitor(
       { dryRun: true },
-      { apify, createRaid, slackClient: {} as never, now: () => now },
+      {
+        apify,
+        apifyActorId: "danek~twitter-scraper-ppr",
+        createRaid,
+        slackClient: {} as never,
+        now: () => now,
+      },
     );
 
     expect(createRaid).not.toHaveBeenCalled();
@@ -150,16 +170,22 @@ describe("runXMonitor", () => {
 
   it("computes a since-window covering the last 5 minutes from now()", async () => {
     const { runXMonitor } = await import("../../src/domain/x-monitor/run-x-monitor.js");
-    const apify = { runSyncGetDatasetItems: vi.fn().mockResolvedValue([]) };
+    const apify = { runActor: vi.fn().mockResolvedValue([]) };
 
     const result = await runXMonitor(
       { dryRun: false },
-      { apify, createRaid: vi.fn(), slackClient: {} as never, now: () => now },
+      {
+        apify,
+        apifyActorId: "danek~twitter-scraper-ppr",
+        createRaid: vi.fn(),
+        slackClient: {} as never,
+        now: () => now,
+      },
     );
 
     expect(result.sinceWindow.to.toISOString()).toBe("2026-04-20T12:30:40.000Z");
     expect(result.sinceWindow.from.toISOString()).toBe("2026-04-20T12:25:40.000Z");
-    const [input] = apify.runSyncGetDatasetItems.mock.calls[0]!;
+    const [, input] = apify.runActor.mock.calls[0]!;
     expect(input.query).toContain("since:2026-04-20_12:25:40_UTC");
     expect(input.query).toContain("from:meanwhile");
   });

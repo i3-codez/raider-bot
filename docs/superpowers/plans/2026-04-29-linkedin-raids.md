@@ -367,7 +367,7 @@ git commit -m "feat: add APIFY_LINKEDIN_MONITOR_ACTOR_ID env var"
 
 ---
 
-## Task 4: Add `LinkedinClient` type and empty `LINKEDIN_CLIENTS` config
+## Task 4: Add `LinkedinClient` type and populated `LINKEDIN_CLIENTS` config
 
 **Files:**
 - Create: `src/config/linkedin-clients.ts`
@@ -383,10 +383,41 @@ export interface LinkedinClient {
   clientName: string;
 }
 
-export const LINKEDIN_CLIENTS = [] as const satisfies readonly LinkedinClient[];
+export const LINKEDIN_CLIENTS = [
+  {
+    url: "https://www.linkedin.com/in/zactownsend",
+    slug: "zactownsend",
+    clientName: "Zac Townsend",
+  },
+  {
+    url: "https://www.linkedin.com/in/shai-novik",
+    slug: "shai-novik",
+    clientName: "Shai Novik",
+  },
+  {
+    url: "https://www.linkedin.com/in/justin-file",
+    slug: "justin-file",
+    clientName: "Justin File",
+  },
+  {
+    url: "https://www.linkedin.com/company/jupiter-onchain",
+    slug: "jupiter-onchain",
+    clientName: "Jupiter",
+  },
+  {
+    url: "https://www.linkedin.com/company/enlivex",
+    slug: "enlivex",
+    clientName: "Enlivex",
+  },
+  {
+    url: "https://www.linkedin.com/company/litestrategy",
+    slug: "litestrategy",
+    clientName: "Lite Strategy",
+  },
+] as const satisfies readonly LinkedinClient[];
 ```
 
-(The list ships empty so `monitor:linkedin` is a safe no-op until populated in a follow-up PR.)
+URLs are stored without trailing slashes (the matcher normalizes them either way). Client names mirror existing `X_CLIENTS` conventions where there's overlap (`Zac Townsend`, `Enlivex`, `Lite Strategy`).
 
 - [ ] **Step 4.2: Run typecheck**
 
@@ -397,7 +428,7 @@ Expected: PASS.
 
 ```bash
 git add src/config/linkedin-clients.ts
-git commit -m "feat: add LinkedinClient type and empty config"
+git commit -m "feat: add LinkedinClient type and populated config"
 ```
 
 ---
@@ -1952,20 +1983,12 @@ Modify `package.json`. After the `"monitor:x"` line in `"scripts"`, add:
     "monitor:linkedin": "tsx src/scripts/run-linkedin-monitor.ts",
 ```
 
-- [ ] **Step 14.2: Verify the script exists**
+- [ ] **Step 14.2: Verify the script is registered**
 
-Run: `npm run monitor:linkedin -- --dry-run --since-minutes=1`
-Expected: exits 0, logs `linkedin-monitor (dry-run): fetched=0 processed=0 failures=0 skipped.nonOriginal=0 skipped.unmapped=0 skipped.malformed=0` (because `LINKEDIN_CLIENTS` ships empty, and the orchestrator short-circuits without calling Apify).
+Run: `npm run | grep monitor:linkedin`
+Expected: prints `monitor:linkedin` once.
 
-If you don't have a populated `.env`, set the minimum required variables inline:
-
-```bash
-DATABASE_URL=postgres://localhost/raider_bot \
-  SLACK_BOT_TOKEN=test SLACK_SIGNING_SECRET=test \
-  SLACK_RAID_CHANNEL_ID=C SLACK_RAID_OPERATOR_USER_IDS=U \
-  PUBLISH_WEBHOOK_SHARED_SECRET=s APIFY_TOKEN=t \
-  npm run monitor:linkedin -- --dry-run --since-minutes=1
-```
+(A live execution against Apify would require a real `APIFY_TOKEN`; that's covered by the rollout smoke test out of scope of this plan.)
 
 - [ ] **Step 14.3: Commit**
 
@@ -2082,12 +2105,7 @@ Expected: PASS — all tests, including the new LinkedIn-monitor tests, the upda
 Run: `grep -rn "x-monitor/apify-client" src tests`
 Expected: no matches.
 
-- [ ] **Step 17.4: Verify the empty-config no-op**
-
-Run: `npm run monitor:linkedin -- --dry-run --since-minutes=1`
-Expected: exit 0, logs `fetched=0 processed=0 failures=0`. (Provide test env vars inline as in Task 14.2 if needed.)
-
-- [ ] **Step 17.5: Confirm git status is clean**
+- [ ] **Step 17.4: Confirm git status is clean**
 
 Run: `git status`
 Expected: "nothing to commit, working tree clean".
@@ -2096,7 +2114,6 @@ Expected: "nothing to commit, working tree clean".
 
 ## Out of scope (intentional follow-ups, not in this plan)
 
-- Populating `LINKEDIN_CLIENTS` with the user-provided list of profile and company URLs.
 - Adding the Coolify Scheduled Task entry.
 - Adding LinkedIn slugs to existing team-member alias rows for self-raid filtering.
 - Live smoke-test against harvestapi to confirm the company-page author shape and dial in the author-matching fallback if surprises surface.

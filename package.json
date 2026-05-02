@@ -18,6 +18,7 @@
     "ops:surfacing": "tsx src/scripts/run-ops-surfacing.ts",
     "canvas:leaderboard": "tsx src/scripts/run-canvas-leaderboard.ts",
     "monitor:x": "tsx src/scripts/run-x-monitor.ts",
+    "monitor:linkedin": "tsx src/scripts/run-linkedin-monitor.ts",
     "pilot:check": "tsx src/scripts/run-pilot-check.ts",
     "typecheck": "tsc --noEmit"
   },

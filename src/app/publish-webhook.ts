@@ -47,7 +47,7 @@ const publishedAtSchema = z.string().trim().min(1).transform((value, context) =>
 export const publishWebhookPayloadSchema = z.object({
   post_url: z.string().trim().url(),
   client_name: z.string().trim().min(1),
-  platform: z.literal("x"),
+  platform: z.enum(["x", "linkedin"]),
   published_at: publishedAtSchema,
   source_event_id: optionalString,
   owner_external_id: optionalString,

@@ -1,6 +1,6 @@
 import { X_CLIENTS, type XClient } from "../../config/x-clients.js";
 import { logger as defaultLogger } from "../../lib/logger.js";
-import type { ApifyClient } from "../../x-monitor/apify-client.js";
+import type { ApifyClient } from "../../lib/apify-client.js";
 import { buildApifyQuery } from "./build-apify-query.js";
 import { filterOriginalTweets } from "./filter-tweets.js";
 import { mapHandleToClientName } from "./map-client-name.js";
@@ -19,6 +19,7 @@ const MONITOR_CREATED_BY = "x-monitor";
 
 export interface MonitorContext {
   apify: ApifyClient;
+  apifyActorId: string;
   createRaid: (input: CreateRaidInput, ctx: CreateRaidContext) => Promise<RaidPost>;
   slackClient: SlackClientLike;
   config?: readonly XClient[];
@@ -41,7 +42,7 @@ export async function runXMonitor(
     since,
   );
 
-  const rawItems = await context.apify.runSyncGetDatasetItems({
+  const rawItems = await context.apify.runActor(context.apifyActorId, {
     max_posts: MAX_POSTS,
     query,
     search_type: "Latest",

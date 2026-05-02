@@ -11,8 +11,8 @@ describe("mapHandleToClientName", () => {
   });
 
   it("is case-insensitive", () => {
-    expect(mapHandleToClientName("JupiterExchange", X_CLIENTS)).toBe("Jupiter");
-    expect(mapHandleToClientName("JUPITEREXCHANGE", X_CLIENTS)).toBe("Jupiter");
+    expect(mapHandleToClientName("Meanwhile", X_CLIENTS)).toBe("Meanwhile");
+    expect(mapHandleToClientName("MEANWHILE", X_CLIENTS)).toBe("Meanwhile");
   });
 
   it("returns undefined for an unknown handle", () => {
