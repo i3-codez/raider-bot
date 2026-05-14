@@ -35,4 +35,9 @@ export const LINKEDIN_CLIENTS = [
     slug: "litestrategy",
     clientName: "Lite Strategy",
   },
+  {
+    url: "https://www.linkedin.com/in/xiao-xiao-j-zhu-12078730",
+    slug: "xiao-xiao-j-zhu-12078730",
+    clientName: "Xiao Xiao J Zhu",
+  },
 ] as const satisfies readonly LinkedinClient[];
